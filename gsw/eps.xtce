@@ -3,32 +3,152 @@
   <xtce:SpaceSystem name="EPS_DATA_TLM">
     <xtce:TelemetryMetaData>
       <xtce:ParameterTypeSet>
-        <xtce:IntegerParameterType name="DEVICE_COUNTER_Type" shortDescription="Reported Device Command Counter" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+        <xtce:IntegerParameterType name="EPS_DEV_BATTERY_VOLTAGE_Type" shortDescription="Battery voltage" signed="false">
+          <xtce:UnitSet>
+            <xtce:Unit>V</xtce:Unit>
+          </xtce:UnitSet>
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term exponent="0" coefficient="0"/>
+              <xtce:Term exponent="1" coefficient="0.12549"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
         </xtce:IntegerParameterType>
-        <xtce:IntegerParameterType name="RAW_EPS_X_Type" shortDescription="Raw eps data x component (1-65535)" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+        <xtce:IntegerParameterType name="EPS_DEV_BATTERY_TEMPERATURE_Type" shortDescription="Battery temperature" signed="false">
+          <xtce:UnitSet>
+            <xtce:Unit>C</xtce:Unit>
+          </xtce:UnitSet>
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term exponent="0" coefficient="0"/>
+              <xtce:Term exponent="1" coefficient="0.9804"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
         </xtce:IntegerParameterType>
-        <xtce:IntegerParameterType name="RAW_EPS_Y_Type" shortDescription="Raw eps data y component (1-65535)" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+        <xtce:IntegerParameterType name="EPS_DEV_SOLAR_VOLTAGE_Type" shortDescription="Solar panel voltage" signed="false">
+          <xtce:UnitSet>
+            <xtce:Unit>V</xtce:Unit>
+          </xtce:UnitSet>
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term exponent="0" coefficient="0"/>
+              <xtce:Term exponent="1" coefficient="0.125"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
         </xtce:IntegerParameterType>
-        <xtce:IntegerParameterType name="RAW_EPS_Z_Type" shortDescription="Raw eps data z component (1-65535)" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+        <xtce:IntegerParameterType name="EPS_DEV_SOLAR_TEMPERATURE_Type" shortDescription="Solar panel temperature" signed="false">
+          <xtce:UnitSet>
+            <xtce:Unit>C</xtce:Unit>
+          </xtce:UnitSet>
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term exponent="0" coefficient="0"/>
+              <xtce:Term exponent="1" coefficient="0.9804"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+        </xtce:IntegerParameterType>
+        <xtce:IntegerParameterType name="EPS_DEV_SWITCH_STATE_Type" shortDescription="Switch state" signed="false">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+          <xtce:StateSet>
+            <xtce:ValueEnumeration label="OFF" value="0"/>
+            <xtce:ValueEnumeration label="ON" value="1"/>
+          </xtce:StateSet>
+        </xtce:IntegerParameterType>
+        <xtce:IntegerParameterType name="EPS_DEV_SWITCH_VOLTAGE_Type" shortDescription="Switch voltage" signed="false">
+          <xtce:UnitSet>
+            <xtce:Unit>V</xtce:Unit>
+          </xtce:UnitSet>
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term exponent="0" coefficient="0"/>
+              <xtce:Term exponent="1" coefficient="0.125"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+        </xtce:IntegerParameterType>
+        <xtce:IntegerParameterType name="EPS_DEV_SWITCH_CURRENT_Type" shortDescription="Switch current" signed="false">
+          <xtce:UnitSet>
+            <xtce:Unit>A</xtce:Unit>
+          </xtce:UnitSet>
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term exponent="0" coefficient="0"/>
+              <xtce:Term exponent="1" coefficient="0.039216"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+        </xtce:IntegerParameterType>
+        <xtce:IntegerParameterType name="EPS_DEV_CRC_Type" shortDescription="CRC-8-CCITT checksum" signed="false">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
         </xtce:IntegerParameterType>
       </xtce:ParameterTypeSet>
       <xtce:ParameterSet>
-        <xtce:Parameter name="DEVICE_COUNTER" parameterTypeRef="DEVICE_COUNTER_Type"/>
-        <xtce:Parameter name="RAW_EPS_X" parameterTypeRef="RAW_EPS_X_Type"/>
-        <xtce:Parameter name="RAW_EPS_Y" parameterTypeRef="RAW_EPS_Y_Type"/>
-        <xtce:Parameter name="RAW_EPS_Z" parameterTypeRef="RAW_EPS_Z_Type"/>
+        <xtce:Parameter name="EPS_DEV_BATTERY_VOLTAGE" parameterTypeRef="EPS_DEV_BATTERY_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_BATTERY_TEMPERATURE" parameterTypeRef="EPS_DEV_BATTERY_TEMPERATURE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SOLAR_VOLTAGE" parameterTypeRef="EPS_DEV_SOLAR_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SOLAR_TEMPERATURE" parameterTypeRef="EPS_DEV_SOLAR_TEMPERATURE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_0_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_0_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_0_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_1_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_1_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_1_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_2_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_2_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_2_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_3_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_3_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_3_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_4_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_4_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_4_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_5_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_5_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_5_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_6_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_6_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_6_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_7_STATE" parameterTypeRef="EPS_DEV_SWITCH_STATE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_7_VOLTAGE" parameterTypeRef="EPS_DEV_SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="EPS_DEV_SWITCH_7_CURRENT" parameterTypeRef="EPS_DEV_SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="EPS_DEV_CRC" parameterTypeRef="EPS_DEV_CRC_Type"/>
       </xtce:ParameterSet>
       <xtce:ContainerSet>
-        <xtce:SequenceContainer name="EPS_DATA_TLM" shortDescription="EPS_Device_tlm_t">
+        <xtce:SequenceContainer name="EPS_DATA_TLM" shortDescription="EPS_Device_HK_tlm_t">
           <xtce:EntryList>
-            <xtce:ParameterRefEntry parameterRef="DEVICE_COUNTER"/>
-            <xtce:ParameterRefEntry parameterRef="RAW_EPS_X"/>
-            <xtce:ParameterRefEntry parameterRef="RAW_EPS_Y"/>
-            <xtce:ParameterRefEntry parameterRef="RAW_EPS_Z"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_BATTERY_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_BATTERY_TEMPERATURE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SOLAR_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SOLAR_TEMPERATURE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_0_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_0_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_0_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_1_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_1_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_1_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_2_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_2_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_2_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_3_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_3_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_3_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_4_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_4_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_4_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_5_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_5_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_5_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_6_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_6_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_6_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_7_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_7_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_SWITCH_7_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="EPS_DEV_CRC"/>
           </xtce:EntryList>
           <xtce:BaseContainer containerRef="/CCSDS/CCSDS_TM">
             <xtce:RestrictionCriteria>
@@ -63,14 +183,81 @@
             <xtce:Enumeration value="1" label="ENABLED"/>
           </xtce:EnumerationList>
         </xtce:EnumeratedParameterType>
-        <xtce:IntegerParameterType name="DEVICE_COUNTER_Type" shortDescription="Reported Device Command Counter" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
-        </xtce:IntegerParameterType>
-        <xtce:IntegerParameterType name="DEVICE_CONFIG_Type" shortDescription="Reported Device Configuration" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
-        </xtce:IntegerParameterType>
-        <xtce:IntegerParameterType name="DEVICE_STATUS_Type" shortDescription="Reported Device Status" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
+        <xtce:FloatParameterType name="BATTERY_VOLTAGE_Type" shortDescription="Battery Voltage (32V/255 scale)">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term coefficient="0.12549" exponent="1"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+          <xtce:UnitSet>
+            <xtce:Unit>V</xtce:Unit>
+          </xtce:UnitSet>
+        </xtce:FloatParameterType>
+        <xtce:FloatParameterType name="BATTERY_TEMPERATURE_Type" shortDescription="Battery Temperature (250C/255 scale)">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term coefficient="0.9804" exponent="1"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+          <xtce:UnitSet>
+            <xtce:Unit>°C</xtce:Unit>
+          </xtce:UnitSet>
+        </xtce:FloatParameterType>
+        <xtce:FloatParameterType name="SOLAR_VOLTAGE_Type" shortDescription="Solar Voltage (32V/255 scale)">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term coefficient="0.125" exponent="1"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+          <xtce:UnitSet>
+            <xtce:Unit>V</xtce:Unit>
+          </xtce:UnitSet>
+        </xtce:FloatParameterType>
+        <xtce:FloatParameterType name="SOLAR_TEMPERATURE_Type" shortDescription="Solar Temperature (250C/255 scale)">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term coefficient="0.9804" exponent="1"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+          <xtce:UnitSet>
+            <xtce:Unit>°C</xtce:Unit>
+          </xtce:UnitSet>
+        </xtce:FloatParameterType>
+        <xtce:EnumeratedParameterType name="SWITCH_STATE_Type" shortDescription="Switch State">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:EnumerationList>
+            <xtce:Enumeration value="0" label="OFF"/>
+            <xtce:Enumeration value="1" label="ON"/>
+          </xtce:EnumerationList>
+        </xtce:EnumeratedParameterType>
+        <xtce:FloatParameterType name="SWITCH_VOLTAGE_Type" shortDescription="Switch Voltage (32V/255 scale)">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term coefficient="0.125" exponent="1"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+          <xtce:UnitSet>
+            <xtce:Unit>V</xtce:Unit>
+          </xtce:UnitSet>
+        </xtce:FloatParameterType>
+        <xtce:FloatParameterType name="SWITCH_CURRENT_Type" shortDescription="Switch Current (10A/255 scale)">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:DefaultCalibrator>
+            <xtce:PolynomialCalibrator>
+              <xtce:Term coefficient="0.0392" exponent="1"/>
+            </xtce:PolynomialCalibrator>
+          </xtce:DefaultCalibrator>
+          <xtce:UnitSet>
+            <xtce:Unit>A</xtce:Unit>
+          </xtce:UnitSet>
+        </xtce:FloatParameterType>
+        <xtce:IntegerParameterType name="CRC_Type" shortDescription="CRC-8-CCITT" signed="false">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
         </xtce:IntegerParameterType>
       </xtce:ParameterTypeSet>
       <xtce:ParameterSet>
@@ -79,9 +266,35 @@
         <xtce:Parameter name="DEVICE_ERR_COUNT" parameterTypeRef="DEVICE_ERR_COUNT_Type"/>
         <xtce:Parameter name="DEVICE_COUNT" parameterTypeRef="DEVICE_COUNT_Type"/>
         <xtce:Parameter name="DEVICE_ENABLED" parameterTypeRef="DEVICE_ENABLED_Type"/>
-        <xtce:Parameter name="DEVICE_COUNTER" parameterTypeRef="DEVICE_COUNTER_Type"/>
-        <xtce:Parameter name="DEVICE_CONFIG" parameterTypeRef="DEVICE_CONFIG_Type"/>
-        <xtce:Parameter name="DEVICE_STATUS" parameterTypeRef="DEVICE_STATUS_Type"/>
+        <xtce:Parameter name="BATTERY_VOLTAGE" parameterTypeRef="BATTERY_VOLTAGE_Type"/>
+        <xtce:Parameter name="BATTERY_TEMPERATURE" parameterTypeRef="BATTERY_TEMPERATURE_Type"/>
+        <xtce:Parameter name="SOLAR_VOLTAGE" parameterTypeRef="SOLAR_VOLTAGE_Type"/>
+        <xtce:Parameter name="SOLAR_TEMPERATURE" parameterTypeRef="SOLAR_TEMPERATURE_Type"/>
+        <xtce:Parameter name="SWITCH_0_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_0_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_0_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="SWITCH_1_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_1_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_1_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="SWITCH_2_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_2_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_2_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="SWITCH_3_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_3_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_3_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="SWITCH_4_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_4_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_4_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="SWITCH_5_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_5_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_5_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="SWITCH_6_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_6_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_6_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="SWITCH_7_STATE" parameterTypeRef="SWITCH_STATE_Type"/>
+        <xtce:Parameter name="SWITCH_7_VOLTAGE" parameterTypeRef="SWITCH_VOLTAGE_Type"/>
+        <xtce:Parameter name="SWITCH_7_CURRENT" parameterTypeRef="SWITCH_CURRENT_Type"/>
+        <xtce:Parameter name="DEVICE_HK_CRC" parameterTypeRef="CRC_Type"/>
       </xtce:ParameterSet>
       <xtce:ContainerSet>
         <xtce:SequenceContainer name="EPS_HK_TLM" shortDescription="EPS_Hk_tlm_t">
@@ -91,9 +304,35 @@
             <xtce:ParameterRefEntry parameterRef="DEVICE_ERR_COUNT"/>
             <xtce:ParameterRefEntry parameterRef="DEVICE_COUNT"/>
             <xtce:ParameterRefEntry parameterRef="DEVICE_ENABLED"/>
-            <xtce:ParameterRefEntry parameterRef="DEVICE_COUNTER"/>
-            <xtce:ParameterRefEntry parameterRef="DEVICE_CONFIG"/>
-            <xtce:ParameterRefEntry parameterRef="DEVICE_STATUS"/>
+            <xtce:ParameterRefEntry parameterRef="BATTERY_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="BATTERY_TEMPERATURE"/>
+            <xtce:ParameterRefEntry parameterRef="SOLAR_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SOLAR_TEMPERATURE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_0_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_0_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_0_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_1_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_1_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_1_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_2_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_2_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_2_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_3_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_3_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_3_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_4_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_4_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_4_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_5_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_5_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_5_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_6_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_6_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_6_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_7_STATE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_7_VOLTAGE"/>
+            <xtce:ParameterRefEntry parameterRef="SWITCH_7_CURRENT"/>
+            <xtce:ParameterRefEntry parameterRef="DEVICE_HK_CRC"/>
           </xtce:EntryList>
           <xtce:BaseContainer containerRef="/CCSDS/CCSDS_TM">
             <xtce:RestrictionCriteria>
@@ -110,8 +349,12 @@
     <xtce:CommandMetaData>
       <xtce:ArgumentTypeSet>
         <xtce:IntegerArgumentType name="DEVICE_CONFIG_Type" initialValue="0" shortDescription="Device Configuration" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned"/>
-          <xtce:ValidRange minInclusive="0" maxInclusive="4294967295"/>
+          <xtce:IntegerDataEncoding sizeInBits="16" encoding="unsigned"/>
+          <xtce:ValidRange minInclusive="0" maxInclusive="65535"/>
+        </xtce:IntegerArgumentType>
+        <xtce:IntegerArgumentType name="SWITCH_NUMBER_Type" initialValue="0" shortDescription="Switch Number (0-7)" signed="false">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:ValidRange minInclusive="0" maxInclusive="7"/>
         </xtce:IntegerArgumentType>
       </xtce:ArgumentTypeSet>
       <xtce:MetaCommandSet>
@@ -177,6 +420,38 @@
           <xtce:ArgumentList/>
           <xtce:CommandContainer name="EPS_EPS_ENABLE_CC_CommandContainer">
             <xtce:EntryList/>
+          </xtce:CommandContainer>
+        </xtce:MetaCommand>
+        <xtce:MetaCommand name="EPS_SWITCH_OFF_CC">
+          <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
+            <xtce:ArgumentAssignmentList>
+              <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="0x18D0"/>
+              <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="5"/>
+            </xtce:ArgumentAssignmentList>
+          </xtce:BaseMetaCommand>
+          <xtce:ArgumentList>
+            <xtce:Argument name="SWITCH_NUMBER" argumentTypeRef="SWITCH_NUMBER_Type"/>
+          </xtce:ArgumentList>
+          <xtce:CommandContainer name="EPS_EPS_SWITCH_OFF_CC_CommandContainer">
+            <xtce:EntryList>
+              <xtce:ArgumentRefEntry argumentRef="SWITCH_NUMBER"/>
+            </xtce:EntryList>
+          </xtce:CommandContainer>
+        </xtce:MetaCommand>
+        <xtce:MetaCommand name="EPS_SWITCH_ON_CC">
+          <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
+            <xtce:ArgumentAssignmentList>
+              <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="0x18D0"/>
+              <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="6"/>
+            </xtce:ArgumentAssignmentList>
+          </xtce:BaseMetaCommand>
+          <xtce:ArgumentList>
+            <xtce:Argument name="SWITCH_NUMBER" argumentTypeRef="SWITCH_NUMBER_Type"/>
+          </xtce:ArgumentList>
+          <xtce:CommandContainer name="EPS_EPS_SWITCH_ON_CC_CommandContainer">
+            <xtce:EntryList>
+              <xtce:ArgumentRefEntry argumentRef="SWITCH_NUMBER"/>
+            </xtce:EntryList>
           </xtce:CommandContainer>
         </xtce:MetaCommand>
         <xtce:MetaCommand name="EPS_RST_COUNTERS_CC">

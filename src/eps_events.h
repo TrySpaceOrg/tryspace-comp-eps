@@ -26,8 +26,8 @@
 #define EPS_CMD_CONFIG_DEV_ERR_EID 23
 
 /* Hardware protocol event IDs */
-#define EPS_UART_INIT_ERR_EID  30
-#define EPS_UART_CLOSE_ERR_EID 31
+#define EPS_I2C_INIT_ERR_EID  30
+#define EPS_I2C_CLOSE_ERR_EID 31
 
 /* Standard telemetry event IDs */
 #define EPS_DEVICE_TLM_ERR_EID 40

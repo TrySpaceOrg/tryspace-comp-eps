@@ -53,7 +53,7 @@ typedef struct
     /*
     ** Device protocol
     */
-    uart_info_t EpsUart; /* Hardware protocol definition */
+    i2c_bus_info_t EpsI2c; /* Hardware protocol definition */
 
 } EPS_AppData_t;
 
@@ -81,6 +81,8 @@ void  EPS_ResetCounters(void);
 void  EPS_Enable(void);
 void  EPS_Disable(void);
 void  EPS_Configure(void);
+void  EPS_SetSwitchOff(void);
+void  EPS_SetSwitchOn(void);
 int32 EPS_VerifyCmdLength(CFE_MSG_Message_t *msg, uint16 expected_length);
 
 #endif /* _EPS_APP_H_ */

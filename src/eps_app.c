@@ -319,6 +319,32 @@ void EPS_ProcessGroundCommand(void)
             break;
 
         /*
+        ** Set Switch OFF Command
+        */
+        case EPS_SWITCH_OFF_CC:
+            if (EPS_VerifyCmdLength(EPS_AppData.MsgPtr, sizeof(EPS_Switch_cmd_t)) == OS_SUCCESS)
+            {
+#ifdef EPS_CFG_DEBUG
+                OS_printf("EPS: EPS_SWITCH_OFF_CC received \n");
+#endif
+                EPS_SetSwitchOff();
+            }
+            break;
+
+        /*
+        ** Set Switch ON Command
+        */
+        case EPS_SWITCH_ON_CC:
+            if (EPS_VerifyCmdLength(EPS_AppData.MsgPtr, sizeof(EPS_Switch_cmd_t)) == OS_SUCCESS)
+            {
+#ifdef EPS_CFG_DEBUG
+                OS_printf("EPS: EPS_SWITCH_ON_CC received \n");
+#endif
+                EPS_SetSwitchOn();
+            }
+            break;
+
+        /*
         ** Invalid Command Codes
         */
         default:
@@ -383,7 +409,7 @@ void EPS_ReportHousekeeping(void)
     /* Check that device is enabled */
     if (EPS_AppData.HkTelemetryPkt.DeviceEnabled == EPS_DEVICE_ENABLED)
     {
-        status = EPS_RequestHK(&EPS_AppData.EpsUart,
+        status = EPS_RequestHK(&EPS_AppData.EpsI2c,
                                   (EPS_Device_HK_tlm_t *)&EPS_AppData.HkTelemetryPkt.DeviceHK);
         if (status == OS_SUCCESS)
         {
@@ -414,9 +440,9 @@ void EPS_ReportDeviceTelemetry(void)
     /* Check that device is enabled */
     if (EPS_AppData.HkTelemetryPkt.DeviceEnabled == EPS_DEVICE_ENABLED)
     {
-        status = EPS_RequestData(&EPS_AppData.EpsUart,
-                                    (EPS_Device_Data_tlm_t *)&EPS_AppData.DevicePkt.Eps);
-        if (status == OS_SUCCESS)
+        status = EPS_RequestHK(&EPS_AppData.EpsI2c,
+                                    (EPS_Device_HK_tlm_t *)&EPS_AppData.DevicePkt.Eps);
+        if (status == I2C_SUCCESS)
         {
             /* Update packet count */
             EPS_AppData.HkTelemetryPkt.DeviceCount++;
@@ -475,14 +501,8 @@ void EPS_Enable(void)
         /*
         ** Do the action, initialize hardware interface and set enabled
         */
-        EPS_AppData.EpsUart.deviceString  = EPS_CFG_STRING;
-        EPS_AppData.EpsUart.handle        = EPS_CFG_HANDLE;
-        EPS_AppData.EpsUart.isOpen        = PORT_CLOSED;
-        EPS_AppData.EpsUart.baud          = EPS_CFG_BAUDRATE_HZ;
-        EPS_AppData.EpsUart.access_option = uart_access_flag_RDWR;
-
-        status = uart_init_port(&EPS_AppData.EpsUart);
-        if (status == OS_SUCCESS)
+        status = EPS_InitDevice(&EPS_AppData.EpsI2c);
+        if (status == I2C_SUCCESS)
         {
             EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_ENABLED;
 
@@ -499,8 +519,8 @@ void EPS_Enable(void)
             EPS_AppData.HkTelemetryPkt.DeviceErrorCount++;
 
             /* Send device event failure to the console */
-            CFE_EVS_SendEvent(EPS_UART_INIT_ERR_EID, CFE_EVS_EventType_ERROR,
-                              "EPS: Device UART port initialization error %d", status);
+            CFE_EVS_SendEvent(EPS_I2C_INIT_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "EPS: Device I2C port initialization error %d", status);
         }
     }
     else
@@ -531,8 +551,8 @@ void EPS_Disable(void)
         /*
         ** Do the action, close hardware interface and set disabled
         */
-        status = uart_close_port(&EPS_AppData.EpsUart);
-        if (status == OS_SUCCESS)
+        status = i2c_master_close(&EPS_AppData.EpsI2c);
+        if (status == I2C_SUCCESS)
         {
             EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_DISABLED;
 
@@ -549,8 +569,8 @@ void EPS_Disable(void)
             EPS_AppData.HkTelemetryPkt.DeviceErrorCount++;
 
             /* Send device event failure to the console */
-            CFE_EVS_SendEvent(EPS_UART_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
-                              "EPS: Device UART port close error %d", status);
+            CFE_EVS_SendEvent(EPS_I2C_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "EPS: Device I2C port close error %d", status);
         }
     }
     else
@@ -604,7 +624,7 @@ void EPS_Configure(void)
         EPS_AppData.HkTelemetryPkt.CommandCount++;
 
         /* Do the action, command device to with a new configuration */
-        device_status = EPS_CommandDevice(&EPS_AppData.EpsUart, EPS_DEVICE_CFG_CMD, config_cmd->DeviceCfg);
+        device_status = EPS_CommandDevice(&EPS_AppData.EpsI2c, EPS_CMD_NOOP, 0);
         if (device_status == OS_SUCCESS)
         {
             /* Increment device success counter */
@@ -622,6 +642,108 @@ void EPS_Configure(void)
             /* Send device event failure to the console */
             CFE_EVS_SendEvent(EPS_CMD_CONFIG_DEV_ERR_EID, CFE_EVS_EventType_ERROR,
                               "EPS: Configuration command received: %u", config_cmd->DeviceCfg);
+        }
+    }
+    return;
+}
+
+/*
+** Set EPS switch OFF
+*/
+void EPS_SetSwitchOff(void)
+{
+    int32 status = OS_SUCCESS;
+    EPS_Switch_cmd_t *switch_cmd = (EPS_Switch_cmd_t *)EPS_AppData.MsgPtr;
+
+    /* Verify device is enabled */
+    if (EPS_AppData.HkTelemetryPkt.DeviceEnabled != EPS_DEVICE_ENABLED)
+    {
+        status = OS_ERROR;
+        EPS_AppData.HkTelemetryPkt.CommandErrorCount++;
+        CFE_EVS_SendEvent(EPS_CMD_CONFIG_EN_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "EPS: Switch OFF command invalid when device disabled");
+    }
+
+    /* Verify switch number is valid */
+    if (switch_cmd->SwitchNumber >= EPS_NUM_SWITCHES)
+    {
+        status = OS_ERROR;
+        EPS_AppData.HkTelemetryPkt.CommandErrorCount++;
+        CFE_EVS_SendEvent(EPS_CMD_CONFIG_VAL_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "EPS: Invalid switch number %d", switch_cmd->SwitchNumber);
+    }
+
+    if (status == OS_SUCCESS)
+    {
+        /* Increment command success counter */
+        EPS_AppData.HkTelemetryPkt.CommandCount++;
+
+        /* Send switch OFF command to device */
+        status = EPS_SetSwitch(&EPS_AppData.EpsI2c, switch_cmd->SwitchNumber, false);
+        if (status == I2C_SUCCESS)
+        {
+            /* Increment device success counter */
+            EPS_AppData.HkTelemetryPkt.DeviceCount++;
+            CFE_EVS_SendEvent(EPS_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                              "EPS: Switch %d turned OFF", switch_cmd->SwitchNumber);
+        }
+        else
+        {
+            /* Increment device error counter */
+            EPS_AppData.HkTelemetryPkt.DeviceErrorCount++;
+            CFE_EVS_SendEvent(EPS_CMD_CONFIG_DEV_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "EPS: Switch OFF command failed for switch %d", switch_cmd->SwitchNumber);
+        }
+    }
+    return;
+}
+
+/*
+** Set EPS switch ON
+*/
+void EPS_SetSwitchOn(void)
+{
+    int32 status = OS_SUCCESS;
+    EPS_Switch_cmd_t *switch_cmd = (EPS_Switch_cmd_t *)EPS_AppData.MsgPtr;
+
+    /* Verify device is enabled */
+    if (EPS_AppData.HkTelemetryPkt.DeviceEnabled != EPS_DEVICE_ENABLED)
+    {
+        status = OS_ERROR;
+        EPS_AppData.HkTelemetryPkt.CommandErrorCount++;
+        CFE_EVS_SendEvent(EPS_CMD_CONFIG_EN_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "EPS: Switch ON command invalid when device disabled");
+    }
+
+    /* Verify switch number is valid */
+    if (switch_cmd->SwitchNumber >= EPS_NUM_SWITCHES)
+    {
+        status = OS_ERROR;
+        EPS_AppData.HkTelemetryPkt.CommandErrorCount++;
+        CFE_EVS_SendEvent(EPS_CMD_CONFIG_VAL_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "EPS: Invalid switch number %d", switch_cmd->SwitchNumber);
+    }
+
+    if (status == OS_SUCCESS)
+    {
+        /* Increment command success counter */
+        EPS_AppData.HkTelemetryPkt.CommandCount++;
+
+        /* Send switch ON command to device */
+        status = EPS_SetSwitch(&EPS_AppData.EpsI2c, switch_cmd->SwitchNumber, true);
+        if (status == I2C_SUCCESS)
+        {
+            /* Increment device success counter */
+            EPS_AppData.HkTelemetryPkt.DeviceCount++;
+            CFE_EVS_SendEvent(EPS_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                              "EPS: Switch %d turned ON", switch_cmd->SwitchNumber);
+        }
+        else
+        {
+            /* Increment device error counter */
+            EPS_AppData.HkTelemetryPkt.DeviceErrorCount++;
+            CFE_EVS_SendEvent(EPS_CMD_CONFIG_DEV_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "EPS: Switch ON command failed for switch %d", switch_cmd->SwitchNumber);
         }
     }
     return;

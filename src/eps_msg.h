@@ -12,6 +12,8 @@
 #define EPS_ENABLE_CC         2
 #define EPS_DISABLE_CC        3
 #define EPS_CONFIG_CC         4
+#define EPS_SWITCH_OFF_CC     5
+#define EPS_SWITCH_ON_CC      6
 
 /*
 ** Telemetry Request Command Codes
@@ -37,6 +39,16 @@ typedef struct
     uint16                  DeviceCfg;
 
 } EPS_Config_cmd_t;
+
+/*
+** EPS switch control command
+*/
+typedef struct
+{
+    CFE_MSG_CommandHeader_t CmdHeader;
+    uint8                   SwitchNumber;
+
+} EPS_Switch_cmd_t;
 
 /*
 ** EPS device telemetry definition

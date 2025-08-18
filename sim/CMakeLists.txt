@@ -9,8 +9,8 @@ pkg_check_modules(ZeroMQ REQUIRED libzmq)
 
   # Find Simulith headers
 set(SIMULITH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../simulith" CACHE PATH "Path to Simulith directory")
-if(NOT EXISTS "${SIMULITH_DIR}/include/simulith_uart.h")
-    message(FATAL_ERROR "Could not find simulith_uart.h in ${SIMULITH_DIR}/include. Please set SIMULITH_DIR to the correct path.")
+if(NOT EXISTS "${SIMULITH_DIR}/include/simulith_i2c.h")
+    message(FATAL_ERROR "Could not find simulith_i2c.h in ${SIMULITH_DIR}/include. Please set SIMULITH_DIR to the correct path.")
 endif()
 
 # Only add Simulith subdirectory if not already added
@@ -26,18 +26,18 @@ endif()
 add_executable(eps_sim
     eps_sim.c
     ../shared/eps_device.c
-    ${SIMULITH_DIR}/src/simulith_uart.c
+    ${SIMULITH_DIR}/src/simulith_i2c.c
     ${SIMULITH_DIR}/src/simulith_common.c
-    ../../../fsw/apps/hwlib/sim/src/libuart.c
+    ../../../fsw/apps/hwlib/sim/src/libi2c.c
 )
 
 # Create the shared library for dynamic loading by director
 add_library(eps_sim_component SHARED
     eps_sim.c
     ../shared/eps_device.c
-    ${SIMULITH_DIR}/src/simulith_uart.c
+    ${SIMULITH_DIR}/src/simulith_i2c.c
     ${SIMULITH_DIR}/src/simulith_common.c
-    ../../../fsw/apps/hwlib/sim/src/libuart.c
+    ../../../fsw/apps/hwlib/sim/src/libi2c.c
 )
 
 # Include directories for both targets
@@ -47,6 +47,7 @@ target_include_directories(eps_sim
     ${SIMULITH_DIR}/include
     ../shared
     ../../../fsw/apps/hwlib/fsw/public_inc
+    ../../../fsw/apps/hwlib/sim/public_inc
     ${ZeroMQ_INCLUDE_DIRS}
 )
 
@@ -56,6 +57,7 @@ target_include_directories(eps_sim_component
     ${SIMULITH_DIR}/include
     ../shared
     ../../../fsw/apps/hwlib/fsw/public_inc
+    ../../../fsw/apps/hwlib/sim/public_inc
     ${ZeroMQ_INCLUDE_DIRS}
 )
 

@@ -1,227 +1,182 @@
 #include "eps_device.h"
 
 /*
-** Generic read data from device
+** CRC-8-CCITT polynomial 0x07 lookup table
 */
-int32_t EPS_ReadData(uart_info_t *device, uint8_t *read_data, uint8_t data_length)
+static const uint8_t crc8_table[256] = {
+    0x00, 0x07, 0x0E, 0x09, 0x1C, 0x1B, 0x12, 0x15,
+    0x38, 0x3F, 0x36, 0x31, 0x24, 0x23, 0x2A, 0x2D,
+    0x70, 0x77, 0x7E, 0x79, 0x6C, 0x6B, 0x62, 0x65,
+    0x48, 0x4F, 0x46, 0x41, 0x54, 0x53, 0x5A, 0x5D,
+    0xE0, 0xE7, 0xEE, 0xE9, 0xFC, 0xFB, 0xF2, 0xF5,
+    0xD8, 0xDF, 0xD6, 0xD1, 0xC4, 0xC3, 0xCA, 0xCD,
+    0x90, 0x97, 0x9E, 0x99, 0x8C, 0x8B, 0x82, 0x85,
+    0xA8, 0xAF, 0xA6, 0xA1, 0xB4, 0xB3, 0xBA, 0xBD,
+    0xC7, 0xC0, 0xC9, 0xCE, 0xDB, 0xDC, 0xD5, 0xD2,
+    0xFF, 0xF8, 0xF1, 0xF6, 0xE3, 0xE4, 0xED, 0xEA,
+    0xB7, 0xB0, 0xB9, 0xBE, 0xAB, 0xAC, 0xA5, 0xA2,
+    0x8F, 0x88, 0x81, 0x86, 0x93, 0x94, 0x9D, 0x9A,
+    0x27, 0x20, 0x29, 0x2E, 0x3B, 0x3C, 0x35, 0x32,
+    0x1F, 0x18, 0x11, 0x16, 0x03, 0x04, 0x0D, 0x0A,
+    0x57, 0x50, 0x59, 0x5E, 0x4B, 0x4C, 0x45, 0x42,
+    0x6F, 0x68, 0x61, 0x66, 0x73, 0x74, 0x7D, 0x7A,
+    0x89, 0x8E, 0x87, 0x80, 0x95, 0x92, 0x9B, 0x9C,
+    0xB1, 0xB6, 0xBF, 0xB8, 0xAD, 0xAA, 0xA3, 0xA4,
+    0xF9, 0xFE, 0xF7, 0xF0, 0xE5, 0xE2, 0xEB, 0xEC,
+    0xC1, 0xC6, 0xCF, 0xC8, 0xDD, 0xDA, 0xD3, 0xD4,
+    0x69, 0x6E, 0x67, 0x60, 0x75, 0x72, 0x7B, 0x7C,
+    0x51, 0x56, 0x5F, 0x58, 0x4D, 0x4A, 0x43, 0x44,
+    0x19, 0x1E, 0x17, 0x10, 0x05, 0x02, 0x0B, 0x0C,
+    0x21, 0x26, 0x2F, 0x28, 0x3D, 0x3A, 0x33, 0x34,
+    0x4E, 0x49, 0x40, 0x47, 0x52, 0x55, 0x5C, 0x5B,
+    0x76, 0x71, 0x78, 0x7F, 0x6A, 0x6D, 0x64, 0x63,
+    0x3E, 0x39, 0x30, 0x37, 0x22, 0x25, 0x2C, 0x2B,
+    0x06, 0x01, 0x08, 0x0F, 0x1A, 0x1D, 0x14, 0x13,
+    0xAE, 0xA9, 0xA0, 0xA7, 0xB2, 0xB5, 0xBC, 0xBB,
+    0x96, 0x91, 0x98, 0x9F, 0x8A, 0x8D, 0x84, 0x83,
+    0xDE, 0xD9, 0xD0, 0xD7, 0xC2, 0xC5, 0xCC, 0xCB,
+    0xE6, 0xE1, 0xE8, 0xEF, 0xFA, 0xFD, 0xF4, 0xF3
+};
+
+/*
+** Calculate CRC-8-CCITT with polynomial 0x07
+*/
+uint8_t EPS_Calculate_CRC8(const uint8_t *data, size_t length)
 {
-    int32_t status             = OS_SUCCESS;
-    int32_t bytes              = 0;
-    int32_t bytes_available    = 0;
-    uint8_t ms_timeout_counter = 0;
-
-    /* Wait until all data received or timeout occurs */
-    bytes_available = uart_bytes_available(device);
-    while ((bytes_available < data_length) && (ms_timeout_counter < EPS_CFG_MS_TIMEOUT))
+    uint8_t crc = 0x00;
+    for (size_t i = 0; i < length; i++)
     {
-        ms_timeout_counter++;
-        OS_TaskDelay(1);
-        bytes_available = uart_bytes_available(device);
+        crc = crc8_table[crc ^ data[i]];
     }
-
-    if (ms_timeout_counter < EPS_CFG_MS_TIMEOUT)
-    {
-        /* Limit bytes available */
-        if (bytes_available > data_length)
-        {
-            bytes_available = data_length;
-        }
-
-        /* Read data */
-        bytes = uart_read_port(device, read_data, bytes_available);
-        if (bytes != bytes_available)
-        {
-            OS_printf("  EPS_ReadData: Bytes read != to requested! \n");
-            status = OS_ERROR;
-        } /* uart_read */
-    }
-    else
-    {
-        status = OS_ERROR;
-    } /* ms_timeout_counter */
-
-    return status;
+    return crc;
 }
 
 /*
-** Generic command to device
-** Note that confirming the echoed response is specific to this implementation
+** Verify CRC-8-CCITT
 */
-int32_t EPS_CommandDevice(uart_info_t *device, uint16_t cmd_code, uint16_t payload)
+bool EPS_Verify_CRC8(const uint8_t *data, size_t length, uint8_t expected_crc)
 {
-    int32_t status = OS_SUCCESS;
-    int32_t bytes  = 0;
-    uint8_t write_data[EPS_DEVICE_CMD_SIZE];
-    uint8_t read_data[EPS_DEVICE_DATA_SIZE];
-
-    /* Prepare command */
-    write_data[0] = EPS_DEVICE_HDR_0;
-    write_data[1] = EPS_DEVICE_HDR_1;
-    write_data[2] = cmd_code >> 8;
-    write_data[3] = cmd_code;
-    write_data[4] = payload >> 8;
-    write_data[5] = payload;
-    write_data[6] = EPS_DEVICE_TRAILER_0;
-    write_data[7] = EPS_DEVICE_TRAILER_1;
-
-    /* Flush any prior data */
-    status = uart_flush(device);
-    if (status == UART_SUCCESS)
-    {
-        /* Write data */
-        bytes = uart_write_port(device, write_data, EPS_DEVICE_CMD_SIZE);
-        #ifdef EPS_CFG_DEBUG
-            OS_printf("  EPS_CommandDevice[%d] = ", bytes);
-            for (uint32_t i = 0; i < EPS_DEVICE_CMD_SIZE; i++)
-            {
-                OS_printf("%02x", write_data[i]);
-            }
-            OS_printf("\n");
-        #endif
-        if (bytes == EPS_DEVICE_CMD_SIZE)
-        {
-            status = EPS_ReadData(device, read_data, EPS_DEVICE_CMD_SIZE);
-            if (status == OS_SUCCESS)
-            {
-                /* Confirm echoed response */
-                bytes = 0;
-                while ((bytes < (int32_t)EPS_DEVICE_CMD_SIZE) && (status == OS_SUCCESS))
-                {
-                    if (read_data[bytes] != write_data[bytes])
-                    {
-                        status = OS_ERROR;
-                    }
-                    bytes++;
-                }
-            } /* EPS_ReadData */
-            else
-            {
-                #ifdef EPS_CFG_DEBUG
-                    OS_printf("EPS_CommandDevice - EPS_ReadData returned %d \n", status);
-                #endif
-            }
-        }
-        else
-        {
-            #ifdef EPS_CFG_DEBUG
-                OS_printf("EPS_CommandDevice - uart_write_port returned %d, expected %d \n", bytes, EPS_DEVICE_CMD_SIZE);
-            #endif
-        } /* uart_write */
-    } /* uart_flush*/
-    else
-    {
-        OS_printf("EPS_CommandDevice - uart_flush returned error %d \n", status);
-    }
-    return status;
+    uint8_t calculated_crc = EPS_Calculate_CRC8(data, length);
+    return (calculated_crc == expected_crc);
 }
 
 /*
-** Request housekeeping command
+** Initialize EPS I2C device
 */
-int32_t EPS_RequestHK(uart_info_t *device, EPS_Device_HK_tlm_t *data)
+int32_t EPS_InitDevice(i2c_bus_info_t *device)
 {
-    int32_t status = OS_SUCCESS;
-    uint8_t read_data[EPS_DEVICE_HK_SIZE];
-
-    /* Command device to send HK */
-    status = EPS_CommandDevice(device, EPS_DEVICE_REQ_HK_CMD, 0);
-    if (status == OS_SUCCESS)
+    if (!device)
     {
-        /* Read HK data */
-        status = EPS_ReadData(device, read_data, sizeof(read_data));
-        if (status == OS_SUCCESS)
-        {
-            #ifdef EPS_CFG_DEBUG
-                OS_printf("  EPS_RequestHK = ");
-                for (uint32_t i = 0; i < sizeof(read_data); i++)
-                {
-                    OS_printf("%02x", read_data[i]);
-                }
-                OS_printf("\n");
-            #endif
+        return I2C_ERROR;
+    }
 
-            /* Verify data header and trailer */
-            if ((read_data[0] == EPS_DEVICE_HDR_0) && (read_data[1] == EPS_DEVICE_HDR_1) &&
-                (read_data[6] == EPS_DEVICE_TRAILER_0) && (read_data[7] == EPS_DEVICE_TRAILER_1))
-            {
-                data->DeviceCounter |= read_data[2] << 8;
-                data->DeviceCounter |= read_data[3];
-                data->DeviceConfig  |= read_data[4] << 8;
-                data->DeviceConfig  |= read_data[5];
-                #ifdef EPS_CFG_DEBUG
-                    OS_printf("  Header  = 0x%02x%02x  \n", read_data[0], read_data[1]);
-                    OS_printf("  Counter = 0x%04x      \n", data->DeviceCounter);
-                    OS_printf("  Config  = 0x%04x      \n", data->DeviceConfig);
-                    OS_printf("  Trailer = 0x%02x%02x  \n", read_data[6], read_data[7]);
-                #endif
-            }
-            else
-            {
-                OS_printf("  EPS_RequestHK: EPS_ReadData reported error %d \n", status);
-                status = OS_ERROR;
-            }
-        } /* EPS_ReadData */
-    }
-    else
-    {
-        OS_printf("  EPS_RequestHK: EPS_CommandDevice reported error %d \n", status);
-    }
-    return status;
+    /* Configure I2C device parameters */
+    device->handle = EPS_I2C_BUS_ID;
+    device->addr = EPS_I2C_DEVICE_ADDR;
+    device->speed = EPS_I2C_SPEED;
+    device->isOpen = I2C_CLOSED;
+
+    /* Initialize I2C master */
+    return i2c_master_init(device);
 }
 
 /*
-** Request data command
+** Send command to EPS device
 */
-int32_t EPS_RequestData(uart_info_t *device, EPS_Device_Data_tlm_t *data)
+int32_t EPS_CommandDevice(i2c_bus_info_t *device, uint8_t cmd, uint8_t payload)
 {
-    int32_t status = OS_SUCCESS;
-    uint8_t read_data[EPS_DEVICE_DATA_SIZE];
-
-    /* Command device to send HK */
-    status = EPS_CommandDevice(device, EPS_DEVICE_REQ_DATA_CMD, 0);
-    if (status == OS_SUCCESS)
+    if (!device || device->isOpen != I2C_OPEN)
     {
-        /* Read HK data */
-        status = EPS_ReadData(device, read_data, sizeof(read_data));
-        if (status == OS_SUCCESS)
-        {
-            #ifdef EPS_CFG_DEBUG
-                OS_printf("  EPS_RequestData = ");
-                for (uint32_t i = 0; i < sizeof(read_data); i++)
-                {
-                    OS_printf("%02x", read_data[i]);
-                }
-                OS_printf("\n");
-            #endif
+        return I2C_ERROR;
+    }
 
-            /* Verify data header and trailer */
-            if ((read_data[0] == EPS_DEVICE_HDR_0) && (read_data[1] == EPS_DEVICE_HDR_1) &&
-                (read_data[8] == EPS_DEVICE_TRAILER_0) && (read_data[9] == EPS_DEVICE_TRAILER_1))
-            {
-                data->Chan1 = read_data[2] << 8;
-                data->Chan1 |= read_data[3];
-                data->Chan2 = read_data[4] << 8;
-                data->Chan2 |= read_data[5];
-                data->Chan3 = read_data[6] << 8;
-                data->Chan3 |= read_data[7];
-                #ifdef EPS_CFG_DEBUG
-                    OS_printf("  Header  = 0x%02x%02x  \n", read_data[0], read_data[1]);
-                    OS_printf("  Chan1   = 0x%04x, %d  \n", data->Chan1, data->Chan1);
-                    OS_printf("  Chan2   = 0x%04x, %d  \n", data->Chan2, data->Chan2);
-                    OS_printf("  Chan3   = 0x%04x, %d  \n", data->Chan3, data->Chan3);
-                    OS_printf("  Trailer = 0x%02x%02x  \n", read_data[8], read_data[9]);
-                #endif
-            }
+    EPS_Command_t command;
+    command.i2c_addr = EPS_I2C_DEVICE_ADDR;
+    command.command = cmd;
+    command.payload = payload;
+    
+    /* Calculate CRC over I2C address through payload */
+    command.crc = EPS_Calculate_CRC8((const uint8_t*)&command, sizeof(command) - 1);
+
+    #ifdef EPS_CFG_DEBUG
+        OS_printf("  EPS_CommandDevice: Sending command 0x%02X with payload 0x%02X, CRC 0x%02X\n", 
+                  cmd, payload, command.crc);
+    #endif
+
+    /* Send command via I2C write transaction */
+    return i2c_write_transaction(device, EPS_I2C_DEVICE_ADDR, (void*)&command, sizeof(command), 100);
+}
+
+/*
+** Request housekeeping data from EPS
+*/
+int32_t EPS_RequestHK(i2c_bus_info_t *device, EPS_Device_HK_tlm_t *data)
+{
+    int32_t status;
+
+    if (!device || !data || device->isOpen != I2C_OPEN)
+    {
+        return I2C_ERROR;
+    }
+
+    /* Send housekeeping request command */
+    status = EPS_CommandDevice(device, EPS_CMD_GET_HK, 0);
+    if (status != I2C_SUCCESS)
+    {
+        OS_printf("EPS_RequestHK: Command failed with status %d\n", status);
+        return status;
+    }
+
+    /* Read housekeeping data */
+    status = i2c_read_transaction(device, EPS_I2C_DEVICE_ADDR, (void*)data, sizeof(*data), 100);
+    if (status != I2C_SUCCESS)
+    {
+        OS_printf("EPS_RequestHK: Read failed with status %d\n", status);
+        return status;
+    }
+
+    /* Verify CRC */
+    if (!EPS_Verify_CRC8((const uint8_t*)data, sizeof(*data) - 1, data->crc))
+    {
+        OS_printf("EPS_RequestHK: CRC verification failed\n");
+        return I2C_ERROR;
+    }
+
+    #ifdef EPS_CFG_DEBUG
+        OS_printf("EPS_RequestHK: Battery %d/255 V, %d/255 C, Solar %d/255 V, %d/255 C\n",
+                  data->battery_voltage, data->battery_temperature,
+                  data->solar_voltage, data->solar_temperature);
+        for (int i = 0; i < EPS_NUM_SWITCHES; i++)
+        {
+            OS_printf("  Switch %d: state=%d, voltage=%d, current=%d\n", 
+                      i, data->switches[i].state, data->switches[i].voltage, data->switches[i].current);
         }
-        else
-        {
-            OS_printf("  EPS_RequestData: Invalid data read! \n");
-            status = OS_ERROR;
-        } /* EPS_ReadData */
-    }
-    else
+    #endif
+
+    return I2C_SUCCESS;
+}
+
+/*
+** Set EPS switch state
+*/
+int32_t EPS_SetSwitch(i2c_bus_info_t *device, uint8_t switch_num, bool state)
+{
+    if (!device || device->isOpen != I2C_OPEN)
     {
-        OS_printf("  EPS_RequestData: EPS_CommandDevice reported error %d \n", status);
+        return I2C_ERROR;
     }
-    return status;
+
+    if (switch_num >= EPS_NUM_SWITCHES)
+    {
+        OS_printf("EPS_SetSwitch: Invalid switch number %d\n", switch_num);
+        return I2C_ERROR;
+    }
+
+    uint8_t cmd = state ? EPS_CMD_SWITCH_ON : EPS_CMD_SWITCH_OFF;
+    
+    #ifdef EPS_CFG_DEBUG
+        OS_printf("EPS_SetSwitch: Setting switch %d to %s\n", switch_num, state ? "ON" : "OFF");
+    #endif
+
+    return EPS_CommandDevice(device, cmd, switch_num);
 }
