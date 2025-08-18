@@ -1,6 +1,6 @@
 eps:
-  string: "/dev/usart_5"
-  handle: 5
+  string: "/dev/usart_9"
+  handle: 9
   baudrate_hz: 115200
   ms_timeout: 250
   debug: true
