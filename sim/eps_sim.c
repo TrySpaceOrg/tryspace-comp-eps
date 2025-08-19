@@ -106,7 +106,6 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
         int bytes_read = simulith_i2c_read(&eps_state->i2c_device, cmd_buffer, sizeof(cmd_buffer));
         if (bytes_read > 0)
         {
-            printf("EPS SIM: Received %d bytes via I2C\n", bytes_read);
             handle_eps_command(eps_state, cmd_buffer, bytes_read);
         }
         last_cmd_check = tick_time_ns;
@@ -115,25 +114,37 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
     /* Update housekeeping data every second */
     if (tick_time_ns - last_hk_update >= hk_update_interval)
     {
-        /* Update battery voltage (simulate slight variation) */
-        eps_state->hk.battery_voltage = 200 + (eps_state->device_counter % 20);
-        
-        /* Update battery temperature */
-        eps_state->hk.battery_temperature = 100 + (eps_state->device_counter % 10);
-        
-        /* Update solar voltage */
-        eps_state->hk.solar_voltage = 180 + (eps_state->device_counter % 30);
-        
-        /* Update solar temperature */
-        eps_state->hk.solar_temperature = 80 + (eps_state->device_counter % 15);
+        /* Update battery/solar voltage and temperature with random slight variation (+1, 0, or -1) */
+        int v_delta = (rand() % 3) - 1; // -1, 0, or +1
+        int t_delta = (rand() % 3) - 1; // -1, 0, or +1
+        eps_state->hk.battery_voltage = 165 + v_delta;
+        eps_state->hk.battery_temperature = 20 + t_delta;
+        v_delta = (rand() % 3) - 1;
+        t_delta = (rand() % 3) - 1;
+        eps_state->hk.solar_voltage = 180 + v_delta;
+        eps_state->hk.solar_temperature = 35 + t_delta;
         
         /* Update switch voltages and currents based on state */
         for (int i = 0; i < EPS_NUM_SWITCHES; i++)
         {
             if (eps_state->hk.switches[i].state == EPS_SWITCH_ON)
             {
-                eps_state->hk.switches[i].voltage = 240 + (i * 2);  /* ~30V */
-                eps_state->hk.switches[i].current = 25 + i;         /* ~1A */
+                /* Set voltage according to switch index, convert to counts (32V/255 per count) */
+                float voltage = 0.0f;
+                if (i == 0 || i == 1)
+                    voltage = 3.3f;
+                else if (i == 2 || i == 3)
+                    voltage = 5.0f;
+                else if (i == 4 || i == 5)
+                    voltage = 12.0f;
+                else if (i == 6 || i == 7)
+                    voltage = 24.0f;
+                uint8_t voltage_count = (uint8_t)(voltage / (32.0f / 255.0f));
+                eps_state->hk.switches[i].voltage = voltage_count;
+                /* Current stays low as nothing is connected, convert to counts (10A/255 per count) */
+                float current = 0.05f; /* 0.05A, example low value */
+                uint8_t current_count = (uint8_t)(current / (10.0f / 255.0f));
+                eps_state->hk.switches[i].current = current_count;
             }
             else
             {
@@ -162,10 +173,10 @@ int eps_sim_init(eps_sim_state_t* state)
     state->device_counter = 0;
     
     /* Set initial values */
-    state->hk.battery_voltage = 200;      /* ~25V */
-    state->hk.battery_temperature = 100;  /* ~98C */
-    state->hk.solar_voltage = 180;        /* ~22.5V */
-    state->hk.solar_temperature = 80;     /* ~78C */
+    state->hk.battery_voltage = 165;
+    state->hk.battery_temperature = 20;
+    state->hk.solar_voltage = 180;
+    state->hk.solar_temperature = 35;
     
     /* Initialize all switches to OFF */
     for (int i = 0; i < EPS_NUM_SWITCHES; i++)

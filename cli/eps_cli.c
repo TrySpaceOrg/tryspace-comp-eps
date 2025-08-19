@@ -15,9 +15,8 @@
 /*
 ** Global Variables
 */
-uart_info_t              EpsUart;
-EPS_Device_HK_tlm_t   EpsHK;
-EPS_Device_Data_tlm_t EpsData;
+i2c_bus_info_t           EpsI2c;
+EPS_Device_HK_tlm_t      EpsHK;
 
 /*
 ** Component Functions
@@ -29,13 +28,12 @@ void print_help(void)
                   "help                               - Display help                    \n"
                   "exit                               - Exit app                        \n"
                   "noop                               - No operation command to device  \n"
-                  "  n                                - ^                               \n"
                   "hk                                 - Request device housekeeping     \n"
-                  "  h                                - ^                               \n"
-                  "eps                             - Request eps data             \n"
-                  "  s                                - ^                               \n"
-                  "cfg #                              - Send configuration #            \n"
-                  "  c #                              - ^                               \n"
+                  "  h                                                                  \n"
+                  "switch_on #                        - Set switch # ON                 \n"
+                  "  on #                                                               \n"
+                  "switch_off #                       - Set switch # OFF                \n"
+                  "  off #                                                              \n"
                   "\n");
 }
 
@@ -49,45 +47,23 @@ int get_command(const char *str)
     to_lower(lcmd);
 
     if (strcmp(lcmd, "help") == 0)
-    {
         status = CMD_HELP;
-    }
     else if (strcmp(lcmd, "exit") == 0)
-    {
         status = CMD_EXIT;
-    }
     else if (strcmp(lcmd, "noop") == 0)
-    {
         status = CMD_NOOP;
-    }
-    else if (strcmp(lcmd, "n") == 0)
-    {
-        status = CMD_NOOP;
-    }
     else if (strcmp(lcmd, "hk") == 0)
-    {
         status = CMD_HK;
-    }
     else if (strcmp(lcmd, "h") == 0)
-    {
         status = CMD_HK;
-    }
-    else if (strcmp(lcmd, "eps") == 0)
-    {
-        status = CMD_EPS;
-    }
-    else if (strcmp(lcmd, "s") == 0)
-    {
-        status = CMD_EPS;
-    }
-    else if (strcmp(lcmd, "cfg") == 0)
-    {
-        status = CMD_CFG;
-    }
-    else if (strcmp(lcmd, "c") == 0)
-    {
-        status = CMD_CFG;
-    }
+    else if (strcmp(lcmd, "switch_on") == 0)
+        status = CMD_SWITCH_ON;
+    else if (strcmp(lcmd, "on") == 0)
+        status = CMD_SWITCH_ON;
+    else if (strcmp(lcmd, "switch_off") == 0)
+        status = CMD_SWITCH_OFF;
+    else if (strcmp(lcmd, "off") == 0)
+        status = CMD_SWITCH_OFF;
     return status;
 }
 
@@ -96,6 +72,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
     int32_t  status      = OS_SUCCESS;
     int32_t  exit_status = OS_SUCCESS;
     uint32_t config;
+    uint8_t switch_num;
 
     /* Process command */
     switch (cc)
@@ -111,61 +88,57 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_NOOP:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                status = EPS_CommandDevice(&EpsUart, EPS_DEVICE_NOOP_CMD, 0);
+                status = EPS_CommandDevice(&EpsI2c, EPS_CMD_NOOP, 0);
                 if (status == OS_SUCCESS)
-                {
                     OS_printf("NOOP command success\n");
-                }
                 else
-                {
                     OS_printf("NOOP command failed with error %d!\n", status);
-                }
             }
             break;
 
         case CMD_HK:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                status = EPS_RequestHK(&EpsUart, &EpsHK);
+                status = EPS_RequestHK(&EpsI2c, &EpsHK);
                 if (status == OS_SUCCESS)
                 {
-                    OS_printf("EPS_RequestHK command success\n");
+                    OS_printf("Housekeeping:\n");
+                    printf("  Battery: %.2f V, %.2f C\n", EpsHK.battery_voltage * 32.0 / 255.0, EpsHK.battery_temperature * 250.0 / 255.0);
+                    printf("  Solar:   %.2f V, %.2f C\n", EpsHK.solar_voltage * 32.0 / 255.0, EpsHK.solar_temperature * 250.0 / 255.0);
+                    for (int i = 0; i < EPS_NUM_SWITCHES; i++) {
+                        printf("  Switch %d: state=%d, voltage=%.2f V, current=%.2f A\n",
+                            i,
+                            EpsHK.switches[i].state,
+                            EpsHK.switches[i].voltage * 32.0 / 255.0,
+                            EpsHK.switches[i].current * 10.0 / 255.0);
+                    }
                 }
                 else
-                {
                     OS_printf("EPS_RequestHK command failed!\n");
-                }
             }
             break;
 
-        case CMD_EPS:
-            if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
-            {
-                status = EPS_RequestData(&EpsUart, &EpsData);
-                if (status == OS_SUCCESS)
-                {
-                    OS_printf("EPS_RequestData command success\n");
-                }
-                else
-                {
-                    OS_printf("EPS_RequestData command failed!\n");
-                }
-            }
-            break;
-
-        case CMD_CFG:
+        case CMD_SWITCH_ON:
             if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
             {
-                config = atoi(tokens[0]);
-                status = EPS_CommandDevice(&EpsUart, EPS_DEVICE_CFG_CMD, config);
+                switch_num = atoi(tokens[0]);
+                status = EPS_SetSwitch(&EpsI2c, switch_num, true);
                 if (status == OS_SUCCESS)
-                {
-                    OS_printf("Configuration command success with value %u\n", config);
-                }
+                    OS_printf("Switch %d ON command success\n", switch_num);
                 else
-                {
-                    OS_printf("Configuration command failed!\n");
-                }
+                    OS_printf("Switch %d ON command failed!\n", switch_num);
+            }
+            break;
+
+        case CMD_SWITCH_OFF:
+            if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
+            {
+                switch_num = atoi(tokens[0]);
+                status = EPS_SetSwitch(&EpsI2c, switch_num, false);
+                if (status == OS_SUCCESS)
+                    OS_printf("Switch %d OFF command success\n", switch_num);
+                else
+                    OS_printf("Switch %d OFF command failed!\n", switch_num);
             }
             break;
 
@@ -186,24 +159,16 @@ int main(int argc, char *argv[])
     char   *token_ptr;
     uint8_t run_status = OS_SUCCESS;
 
-    /* Initialize UART */
-    EpsUart.deviceString = EPS_CFG_STRING;
-    EpsUart.handle = EPS_CFG_HANDLE;
-    EpsUart.isOpen = PORT_CLOSED;
-    EpsUart.baud = EPS_CFG_BAUDRATE_HZ;
-    EpsUart.access_option = uart_access_flag_RDWR;
-
-    OS_printf("Delay for UART initialization...\n");
-    sleep(3);
-
-    status = uart_init_port(&EpsUart);
+    /* Initialize I2C */
+    status = EPS_InitDevice(&EpsI2c);
     if (status == OS_SUCCESS)
     {
-        printf("UART device %s configured with baudrate %d \n", EpsUart.deviceString, EpsUart.baud);
+        printf("I2C device initialized: handle=%d, addr=0x%02X, speed=%d\n", EpsI2c.handle, EpsI2c.addr, EpsI2c.speed);
+        EpsI2c.isOpen = I2C_OPEN;
     }
     else
     {
-        printf("UART device %s failed to initialize! \n", EpsUart.deviceString);
+        printf("I2C device failed to initialize!\n");
         run_status = OS_ERROR;
     }
 
@@ -244,10 +209,10 @@ int main(int argc, char *argv[])
     }
 
     // Close the device
-    if (EpsUart.isOpen == PORT_OPEN)
+    if (EpsI2c.isOpen == I2C_OPEN)
     {
-        uart_close_port(&EpsUart);
-        EpsUart.isOpen = PORT_CLOSED;
+        i2c_master_close(&EpsI2c);
+        EpsI2c.isOpen = I2C_CLOSED;
     }
 
     return status;

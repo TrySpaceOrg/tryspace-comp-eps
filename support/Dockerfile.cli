@@ -7,4 +7,4 @@ COPY ./build /app
 WORKDIR /app
 
 # Set command to run
-CMD ["/app/demo_cli"]
+CMD ["/app/eps_cli"]

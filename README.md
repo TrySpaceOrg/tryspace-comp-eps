@@ -19,6 +19,7 @@ The specific command format is as follows:
   * Unused except for set switch commands
 * uint8, CRC-8-CCITT polynomial 0x07
 
+EPS telemetry is updated once per second.
 The housekeeping format is as follows:
 * uint8, battery voltage (32V / 255 = 0.12549V per count)
 * uint8, battery temperature (250C / 255 = 0.9803921568627451C per count)

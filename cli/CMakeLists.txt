@@ -14,8 +14,8 @@ if(${TGTNAME} STREQUAL cpu1)
   
   # Find Simulith headers
   set(SIMULITH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../simulith" CACHE PATH "Path to Simulith directory")
-  if(NOT EXISTS "${SIMULITH_DIR}/include/simulith_uart.h")
-      message(FATAL_ERROR "Could not find simulith_uart.h in ${SIMULITH_DIR}/include. Please set SIMULITH_DIR to the correct path.")
+  if(NOT EXISTS "${SIMULITH_DIR}/include/simulith_i2c.h")
+      message(FATAL_ERROR "Could not find simulith_i2c.h in ${SIMULITH_DIR}/include. Please set SIMULITH_DIR to the correct path.")
   endif()
 
   # Only add Simulith subdirectory if not already added
@@ -49,9 +49,9 @@ if(${TGTNAME} STREQUAL cpu1)
   )
   set(eps_cli_src 
     ${eps_cli_src}
-    ${SIMULITH_DIR}/src/simulith_uart.c
+    ${SIMULITH_DIR}/src/simulith_i2c.c
     ${SIMULITH_DIR}/src/simulith_common.c
-    ../../../fsw/apps/hwlib/sim/src/libuart.c
+    ../../../fsw/apps/hwlib/sim/src/libi2c.c
   )
   set(eps_cli_libs
     ${ZeroMQ_LIBRARIES}
@@ -61,7 +61,7 @@ endif()
 if(${TGTNAME} STREQUAL cpu2)
   set(eps_cli_src 
     ${eps_cli_src}
-    ../../../fsw/apps/hwlib/fsw/linux/libuart.c
+    ../../../fsw/apps/hwlib/fsw/linux/libi2c.c
   )
 endif()
 
