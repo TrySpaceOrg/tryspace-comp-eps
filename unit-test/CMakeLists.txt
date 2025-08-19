@@ -18,7 +18,7 @@
 #    code units.
 #
 
-add_cfe_coverage_stubs(eps-internal stubs/eps_device_stubs.c stubs/libuart_stubs.c) 
+add_cfe_coverage_stubs(eps-internal stubs/eps_device_stubs.c stubs/libi2c_stubs.c) 
 target_link_libraries(coverage-eps-internal-stubs ut_core_api_stubs ut_assert)
 target_include_directories(coverage-eps-internal-stubs PUBLIC $<TARGET_PROPERTY:eps,INCLUDE_DIRECTORIES>)
 
@@ -46,7 +46,7 @@ add_cfe_coverage_test(eps ALL
 add_cfe_coverage_test(eps DEVICE 
     "coveragetest/coveragetest_eps_device.c"
     "../shared/eps_device.c"
-    "stubs/libuart_stubs.c"
+    "stubs/libi2c_stubs.c"
 )
 
 add_cfe_coverage_dependency(eps ALL eps-internal)

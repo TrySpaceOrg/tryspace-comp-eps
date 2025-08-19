@@ -46,11 +46,6 @@ typedef struct
     uint32             RunStatus; /* App run status for controlling the application state */
 
     /*
-     ** Device data
-     */
-    EPS_Device_tlm_t DevicePkt; /* Device specific data packet */
-
-    /*
     ** Device protocol
     */
     i2c_bus_info_t EpsI2c; /* Hardware protocol definition */
@@ -76,11 +71,9 @@ void  EPS_ProcessCommandPacket(void);
 void  EPS_ProcessGroundCommand(void);
 void  EPS_ProcessTelemetryRequest(void);
 void  EPS_ReportHousekeeping(void);
-void  EPS_ReportDeviceTelemetry(void);
 void  EPS_ResetCounters(void);
 void  EPS_Enable(void);
 void  EPS_Disable(void);
-void  EPS_Configure(void);
 void  EPS_SetSwitchOff(void);
 void  EPS_SetSwitchOn(void);
 int32 EPS_VerifyCmdLength(CFE_MSG_Message_t *msg, uint16 expected_length);

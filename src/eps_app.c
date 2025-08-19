@@ -139,13 +139,6 @@ int32 EPS_AppInit(void)
                  EPS_HK_TLM_LNGTH);
 
     /*
-    ** Initialize the device packet message
-    ** This packet is specific to your application
-    */
-    CFE_MSG_Init(CFE_MSG_PTR(EPS_AppData.DevicePkt.TlmHeader), CFE_SB_ValueToMsgId(EPS_DEVICE_TLM_MID),
-                 EPS_DEVICE_TLM_LNGTH);
-
-    /*
     ** Reset all counters during application initialization
     */
     EPS_ResetCounters();
@@ -305,20 +298,6 @@ void EPS_ProcessGroundCommand(void)
             break;
 
         /*
-        ** Set Configuration Command
-        ** Note that this is an example of a command that has additional arguments
-        */
-        case EPS_CONFIG_CC:
-            if (EPS_VerifyCmdLength(EPS_AppData.MsgPtr, sizeof(EPS_Config_cmd_t)) == OS_SUCCESS)
-            {
-#ifdef EPS_CFG_DEBUG
-                OS_printf("EPS: EPS_CONFIG_CC received \n");
-#endif
-                EPS_Configure();
-            }
-            break;
-
-        /*
         ** Set Switch OFF Command
         */
         case EPS_SWITCH_OFF_CC:
@@ -379,10 +358,6 @@ void EPS_ProcessTelemetryRequest(void)
             EPS_ReportHousekeeping();
             break;
 
-        case EPS_REQ_DATA_TLM:
-            EPS_ReportDeviceTelemetry();
-            break;
-
         /*
         ** Invalid Command Codes
         */
@@ -427,38 +402,6 @@ void EPS_ReportHousekeeping(void)
     /* Time stamp and publish housekeeping telemetry */
     CFE_SB_TimeStampMsg((CFE_MSG_Message_t *)&EPS_AppData.HkTelemetryPkt);
     CFE_SB_TransmitMsg((CFE_MSG_Message_t *)&EPS_AppData.HkTelemetryPkt, true);
-    return;
-}
-
-/*
-** Collect and report device telemetry
-*/
-void EPS_ReportDeviceTelemetry(void)
-{
-    int32 status = OS_SUCCESS;
-
-    /* Check that device is enabled */
-    if (EPS_AppData.HkTelemetryPkt.DeviceEnabled == EPS_DEVICE_ENABLED)
-    {
-        status = EPS_RequestHK(&EPS_AppData.EpsI2c,
-                                    (EPS_Device_HK_tlm_t *)&EPS_AppData.DevicePkt.Eps);
-        if (status == I2C_SUCCESS)
-        {
-            /* Update packet count */
-            EPS_AppData.HkTelemetryPkt.DeviceCount++;
-
-            /* Time stamp and publish data telemetry */
-            CFE_SB_TimeStampMsg((CFE_MSG_Message_t *)&EPS_AppData.DevicePkt);
-            CFE_SB_TransmitMsg((CFE_MSG_Message_t *)&EPS_AppData.DevicePkt, true);
-        }
-        else
-        {
-            EPS_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(EPS_REQ_DATA_ERR_EID, CFE_EVS_EventType_ERROR,
-                              "EPS: Request device data reported error %d", status);
-        }
-    }
-    /* Intentionally do not report errors if device disabled */
     return;
 }
 
@@ -581,68 +524,6 @@ void EPS_Disable(void)
         /* Send command event failure to the console */
         CFE_EVS_SendEvent(EPS_DISABLE_ERR_EID, CFE_EVS_EventType_ERROR,
                           "EPS: Device disable failed, already disabled");
-    }
-    return;
-}
-
-/*
-** Configure component
-*/
-void EPS_Configure(void)
-{
-    int32 status        = OS_SUCCESS;
-    int32 device_status = OS_SUCCESS;
-    EPS_Config_cmd_t *config_cmd    = (EPS_Config_cmd_t *)EPS_AppData.MsgPtr;
-
-    /* Do any necessary checks, confirm that device is currently enabled */
-    if (EPS_AppData.HkTelemetryPkt.DeviceEnabled != EPS_DEVICE_ENABLED)
-    {
-        status = OS_ERROR;
-        /* Increment command error count */
-        EPS_AppData.HkTelemetryPkt.CommandErrorCount++;
-
-        /* Send event logging failure of check to the console */
-        CFE_EVS_SendEvent(EPS_CMD_CONFIG_EN_ERR_EID, CFE_EVS_EventType_ERROR,
-                          "EPS: Configuration command invalid when device disabled");
-    }
-
-    /* Do any necessary checks, confirm valid configuration value */
-    if (config_cmd->DeviceCfg == 65535)
-    {
-        status = OS_ERROR;
-        /* Increment command error count */
-        EPS_AppData.HkTelemetryPkt.CommandErrorCount++;
-
-        /* Send event logging failure of check to the console */
-        CFE_EVS_SendEvent(EPS_CMD_CONFIG_VAL_ERR_EID, CFE_EVS_EventType_ERROR,
-                          "EPS: Configuration command with value %u is invalid", config_cmd->DeviceCfg);
-    }
-
-    if (status == OS_SUCCESS)
-    {
-        /* Increment command success counter */
-        EPS_AppData.HkTelemetryPkt.CommandCount++;
-
-        /* Do the action, command device to with a new configuration */
-        device_status = EPS_CommandDevice(&EPS_AppData.EpsI2c, EPS_CMD_NOOP, 0);
-        if (device_status == OS_SUCCESS)
-        {
-            /* Increment device success counter */
-            EPS_AppData.HkTelemetryPkt.DeviceCount++;
-
-            /* Send device event success to the console */
-            CFE_EVS_SendEvent(EPS_CMD_CONFIG_INF_EID, CFE_EVS_EventType_INFORMATION,
-                              "EPS: Configuration command received: %u", config_cmd->DeviceCfg);
-        }
-        else
-        {
-            /* Increment device error counter */
-            EPS_AppData.HkTelemetryPkt.DeviceErrorCount++;
-
-            /* Send device event failure to the console */
-            CFE_EVS_SendEvent(EPS_CMD_CONFIG_DEV_ERR_EID, CFE_EVS_EventType_ERROR,
-                              "EPS: Configuration command received: %u", config_cmd->DeviceCfg);
-        }
     }
     return;
 }

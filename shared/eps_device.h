@@ -68,17 +68,6 @@ typedef struct
 #define EPS_DEVICE_HK_LNGTH sizeof(EPS_Device_HK_tlm_t)
 
 /*
-** Legacy data telemetry definition (keeping for compatibility)
-*/
-typedef struct
-{
-    uint16_t Chan1;
-    uint16_t Chan2;
-    uint16_t Chan3;
-} __attribute__((packed)) EPS_Device_Data_tlm_t;
-#define EPS_DEVICE_DATA_LNGTH sizeof(EPS_Device_Data_tlm_t)
-
-/*
 ** CRC-8-CCITT Functions
 */
 uint8_t EPS_Calculate_CRC8(const uint8_t *data, size_t length);

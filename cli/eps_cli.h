@@ -39,9 +39,8 @@
 #define CMD_EXIT      1
 #define CMD_NOOP      2
 #define CMD_HK        3
-#define CMD_CFG       4
-#define CMD_SWITCH_ON 5
-#define CMD_SWITCH_OFF 6
+#define CMD_SWITCH_ON 4
+#define CMD_SWITCH_OFF 5
 
 /*
 ** Prototypes
