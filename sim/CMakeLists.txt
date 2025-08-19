@@ -7,83 +7,61 @@ include(../../CompFlags.cmake)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(ZeroMQ REQUIRED libzmq)
 
-  # Find Simulith headers
+# Find Simulith headers
 set(SIMULITH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../simulith" CACHE PATH "Path to Simulith directory")
 if(NOT EXISTS "${SIMULITH_DIR}/include/simulith_i2c.h")
     message(FATAL_ERROR "Could not find simulith_i2c.h in ${SIMULITH_DIR}/include. Please set SIMULITH_DIR to the correct path.")
 endif()
 
-# Only add Simulith subdirectory if not already added
-if(NOT TARGET simulith)
-# Set policy to NEW to allow external project linking
-cmake_policy(SET CMP0079 NEW)
-add_subdirectory(${SIMULITH_DIR} ${CMAKE_BINARY_DIR}/simulith)
+# Prefer a pre-built simulith static library if present in the simulith build dir.
+set(SIMULITH_BUILD_LIB "${SIMULITH_DIR}/build/libsimulith.a")
+if(EXISTS "${SIMULITH_BUILD_LIB}")
+    message(STATUS "Using prebuilt simulith: ${SIMULITH_BUILD_LIB}")
+    add_library(simulith STATIC IMPORTED)
+    set_target_properties(simulith PROPERTIES IMPORTED_LOCATION "${SIMULITH_BUILD_LIB}")
+else()
+    # Only add Simulith subdirectory if not already added
+    if(NOT TARGET simulith)
+        add_subdirectory(${SIMULITH_DIR} ${CMAKE_BINARY_DIR}/simulith)
+    endif()
 endif()
 
-
-
-# Create the standalone executable
-add_executable(eps_sim
-    eps_sim.c
-    ../shared/eps_device.c
-    ${SIMULITH_DIR}/src/simulith_i2c.c
-    ${SIMULITH_DIR}/src/simulith_common.c
-    ../../../fsw/apps/hwlib/sim/src/libi2c.c
-)
+# Determine whether to include simulith source files in component targets.
+if(EXISTS "${SIMULITH_BUILD_LIB}")
+    set(SIMULITH_SRC_FILES "")
+else()
+    set(SIMULITH_SRC_FILES
+        ${SIMULITH_DIR}/src/simulith_common.c
+        ${SIMULITH_DIR}/src/simulith_i2c.c
+    )
+endif()
 
 # Create the shared library for dynamic loading by director
 add_library(eps_sim_component SHARED
     eps_sim.c
     ../shared/eps_device.c
-    ${SIMULITH_DIR}/src/simulith_i2c.c
-    ${SIMULITH_DIR}/src/simulith_common.c
     ../../../fsw/apps/hwlib/sim/src/libi2c.c
+    ${SIMULITH_SRC_FILES}
 )
 
-# Include directories for both targets
-target_include_directories(eps_sim
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${SIMULITH_DIR}/include
-    ../shared
-    ../../../fsw/apps/hwlib/fsw/public_inc
-    ../../../fsw/apps/hwlib/sim/public_inc
-    ${ZeroMQ_INCLUDE_DIRS}
-)
-
+# Include directories
 target_include_directories(eps_sim_component
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${SIMULITH_DIR}/include
     ../shared
     ../../../fsw/apps/hwlib/fsw/public_inc
-    ../../../fsw/apps/hwlib/sim/public_inc
     ${ZeroMQ_INCLUDE_DIRS}
 )
 
-# Compile definitions
-target_compile_definitions(eps_sim PRIVATE STANDALONE_MODE)
-# eps_sim_component gets no STANDALONE_MODE definition
-
-# Link against Simulith and ZeroMQ for both targets
-target_link_libraries(eps_sim
-    PRIVATE
-    simulith
-    ${ZeroMQ_LIBRARIES}
-)
-
+# Link against Simulith and ZeroMQ for the component
 target_link_libraries(eps_sim_component
     PRIVATE
     simulith
     ${ZeroMQ_LIBRARIES}
 )
 
-# Set C standard for both targets
-set_target_properties(eps_sim PROPERTIES
-    C_STANDARD 11
-    C_STANDARD_REQUIRED ON
-)
-
+# Set C standard for the component
 set_target_properties(eps_sim_component PROPERTIES
     C_STANDARD 11
     C_STANDARD_REQUIRED ON
@@ -91,6 +69,5 @@ set_target_properties(eps_sim_component PROPERTIES
     PREFIX ""
 )
 
-# Add dependencies on simulith for both targets
-add_dependencies(eps_sim simulith)
+# Add dependency on simulith for the component target
 add_dependencies(eps_sim_component simulith)

@@ -100,20 +100,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
                 status = EPS_RequestHK(&EpsI2c, &EpsHK);
-                if (status == OS_SUCCESS)
-                {
-                    OS_printf("Housekeeping:\n");
-                    printf("  Battery: %.2f V, %.2f C\n", EpsHK.battery_voltage * 32.0 / 255.0, EpsHK.battery_temperature * 250.0 / 255.0);
-                    printf("  Solar:   %.2f V, %.2f C\n", EpsHK.solar_voltage * 32.0 / 255.0, EpsHK.solar_temperature * 250.0 / 255.0);
-                    for (int i = 0; i < EPS_NUM_SWITCHES; i++) {
-                        printf("  Switch %d: state=%d, voltage=%.2f V, current=%.2f A\n",
-                            i,
-                            EpsHK.switches[i].state,
-                            EpsHK.switches[i].voltage * 32.0 / 255.0,
-                            EpsHK.switches[i].current * 10.0 / 255.0);
-                    }
-                }
-                else
+                if (status != OS_SUCCESS)
                     OS_printf("EPS_RequestHK command failed!\n");
             }
             break;

@@ -51,13 +51,10 @@ The housekeeping format is as follows:
 * uint8, switch 7 current (10A / 255 = 0.0392156862745098A per count)
 * uint8, CRC-8-CCITT polynomial 0x07
 
-### Command Line 
-The CLI can be configured to connect to either the hardware or simulation.
-This enables direct checkouts these without interference.
-
 ### Command Line Interface
 The CLI can be configured to connect to either the hardware or simulation.
 This enables direct checkouts these without interference.
+Note that `make cfg` (tryspace_orchestrator.py) must be run at the top level tryspace-lab to produce the required `./shared/device_cfg.h`.
 
 ### Flight Software
 The core Flight System (cFS) flight software application receives commands from the software bus.
@@ -81,3 +78,4 @@ The XTCE file provided details the CCSDS Space Packet Protocol format used for c
 
 ### Simulation
 The simulation builds as both a standalone executable that would connect to simulith as the external time driver and as a library for the tryspace-director to load.
+Similar to the CLI, the `make cfg` call at the top level tryspace-lab is required.
