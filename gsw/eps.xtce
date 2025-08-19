@@ -187,15 +187,12 @@
   <xtce:SpaceSystem name="CMD">
     <xtce:CommandMetaData>
       <xtce:ArgumentTypeSet>
-        <xtce:IntegerArgumentType name="DEVICE_CONFIG_Type" initialValue="0" shortDescription="Device Configuration" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="16" encoding="unsigned"/>
-          <xtce:ValidRange minInclusive="0" maxInclusive="65535"/>
-        </xtce:IntegerArgumentType>
         <xtce:IntegerArgumentType name="SWITCH_NUMBER_Type" initialValue="0" shortDescription="Switch Number (0-7)" signed="false">
           <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
           <xtce:ValidRange minInclusive="0" maxInclusive="7"/>
         </xtce:IntegerArgumentType>
       </xtce:ArgumentTypeSet>
+      <xtce:MetaCommandSet>
         <xtce:MetaCommand name="EPS_REQ_HK">
           <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
             <xtce:ArgumentAssignmentList>
