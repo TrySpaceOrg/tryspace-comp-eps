@@ -48,7 +48,7 @@ static int32 UT_CheckEvent_Hook(void *UserObj, int32 StubRetcode, uint32 CallCou
                      * rather it is validating what the system snprintf() library function
                      * produces when passed the format string and args.
                      *
-                     * This type of check has been epsnstrated to make tests very fragile,
+                     * This type of check has been demonstrated to make tests very fragile,
                      * because it is influenced by many factors outside the control of the
                      * test case.
                      *

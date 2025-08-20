@@ -1,4 +1,4 @@
-# Makefile for TrySpace epsnstration component CLI development
+# Makefile for TrySpace EPS component CLI development
 .PHONY: all build clean debug runtime start stop
 
 export BUILDDIR ?= $(CURDIR)/build
