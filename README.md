@@ -77,5 +77,6 @@ Two message IDs exist for telemetry:
 The XTCE file provided details the CCSDS Space Packet Protocol format used for commanding and telemetry.
 
 ### Simulation
-The simulation builds as both a standalone executable that would connect to simulith as the external time driver and as a library for the tryspace-director to load.
-Similar to the CLI, the `make cfg` call at the top level tryspace-lab is required.
+The simulation available is built as a library that is loaded by the tryspace-director for use.
+This maintains the state of the simulation and enables communication to the FSW via simulith.
+Similar to the CLI, the `make cfg` call at the top level tryspace-lab is required prior to building.

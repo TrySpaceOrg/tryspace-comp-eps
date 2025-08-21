@@ -14,8 +14,8 @@ if(${TGTNAME} STREQUAL cpu1)
   
   # Find Simulith headers
   set(SIMULITH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../simulith" CACHE PATH "Path to Simulith directory")
-  if(NOT EXISTS "${SIMULITH_DIR}/include/simulith_i2c.h")
-      message(FATAL_ERROR "Could not find simulith_i2c.h in ${SIMULITH_DIR}/include. Please set SIMULITH_DIR to the correct path.")
+  if(NOT EXISTS "${SIMULITH_DIR}/include/simulith_transport.h")
+      message(FATAL_ERROR "Could not find simulith_transport.h in ${SIMULITH_DIR}/include. Please set SIMULITH_DIR to the correct path.")
   endif()
 
   # Prefer a pre-built simulith static library if present in the simulith build dir.
@@ -54,7 +54,7 @@ if(${TGTNAME} STREQUAL cpu1)
   )
   set(eps_cli_src 
     ${eps_cli_src}
-    ${SIMULITH_DIR}/src/simulith_i2c.c
+    ${SIMULITH_DIR}/src/simulith_transport.c
     ${SIMULITH_DIR}/src/simulith_common.c
     ../../../fsw/apps/hwlib/sim/src/libi2c.c
   )

@@ -40,7 +40,7 @@ static void handle_eps_command(eps_sim_state_t* state, const uint8_t* data, size
             /* Calculate CRC for housekeeping data */
             state->hk.crc = EPS_Calculate_CRC8((const uint8_t*)&state->hk, sizeof(state->hk) - 1);
             /* Send housekeeping data back via I2C */
-            if (simulith_i2c_write(&state->i2c_device, (const uint8_t*)&state->hk, sizeof(state->hk)) < 0)
+            if (simulith_transport_send(&state->i2c_device, (const uint8_t*)&state->hk, sizeof(state->hk)) < 0)
             {
                 printf("EPS SIM: Failed to send housekeeping data\n");
             }
@@ -95,21 +95,7 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
     }
 
     static uint64_t last_hk_update = 0;
-    static uint64_t last_cmd_check = 0;
     const uint64_t hk_update_interval = 1000000000ULL; /* 1 second in nanoseconds */
-    const uint64_t cmd_check_interval = 100000000ULL;  /* 100ms in nanoseconds */
-    
-    /* Check for incoming I2C commands */
-    if (tick_time_ns - last_cmd_check >= cmd_check_interval)
-    {
-        uint8_t cmd_buffer[256];
-        int bytes_read = simulith_i2c_read(&eps_state->i2c_device, cmd_buffer, sizeof(cmd_buffer));
-        if (bytes_read > 0)
-        {
-            handle_eps_command(eps_state, cmd_buffer, bytes_read);
-        }
-        last_cmd_check = tick_time_ns;
-    }
     
     /* Update housekeeping data every second */
     if (tick_time_ns - last_hk_update >= hk_update_interval)
@@ -154,6 +140,17 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
         }
         
         last_hk_update = tick_time_ns;
+    }
+        
+    int available = simulith_transport_available(&eps_state->i2c_device);
+    if (available > 0)
+    {
+        uint8_t cmd_buffer[256];
+        int bytes_read = simulith_transport_receive(&eps_state->i2c_device, cmd_buffer, sizeof(cmd_buffer));
+        if (bytes_read > 0)
+        {
+            handle_eps_command(eps_state, cmd_buffer, bytes_read);
+        }
     }
 }
 
@@ -227,17 +224,14 @@ static int eps_component_init(component_state_t** state)
     
     /* Initialize I2C device */
     memset(&eps_state->i2c_device, 0, sizeof(eps_state->i2c_device));
-    eps_state->i2c_device.bus_id = EPS_I2C_BUS_ID;
-    eps_state->i2c_device.device_addr = EPS_I2C_DEVICE_ADDR;
-    eps_state->i2c_device.is_server = 1;  /* This simulation acts as the I2C device (server) */
-    
     /* Set up ZMQ address for this device */
-    snprintf(eps_state->i2c_device.address, sizeof(eps_state->i2c_device.address), 
-             "tcp://*:%d", SIMULITH_I2C_BASE_PORT + eps_state->i2c_device.bus_id * 100 + eps_state->i2c_device.device_addr);
     snprintf(eps_state->i2c_device.name, sizeof(eps_state->i2c_device.name), 
-             "eps_sim_bus%d_addr0x%02X", eps_state->i2c_device.bus_id, eps_state->i2c_device.device_addr);
-    
-    if (simulith_i2c_init(&eps_state->i2c_device) != 0)
+        "eps_sim_bus%d_addr0x%02X", EPS_I2C_BUS_ID, EPS_I2C_DEVICE_ADDR);
+    snprintf(eps_state->i2c_device.address, sizeof(eps_state->i2c_device.address), 
+        "ipc:///tmp/simulith_pub:%d", SIMULITH_I2C_BASE_PORT + EPS_I2C_BUS_ID * 100 + EPS_I2C_DEVICE_ADDR);
+    eps_state->i2c_device.is_server = 1;  // Always server/bind for the simulator
+
+    if (simulith_transport_init(&eps_state->i2c_device) != 0)
     {
         printf("EPS SIM: Failed to initialize I2C device\n");
         eps_sim_cleanup(eps_state);
@@ -258,7 +252,7 @@ static void eps_component_cleanup(component_state_t* state)
     eps_sim_state_t* eps_state = (eps_sim_state_t*)state;
     if (eps_state)
     {
-        simulith_i2c_close(&eps_state->i2c_device);
+        simulith_transport_close(&eps_state->i2c_device);
         eps_sim_cleanup(eps_state);
         free(eps_state);
     }
@@ -283,39 +277,4 @@ static const component_interface_t eps_component_interface = {
 const component_interface_t* get_component_interface(void)
 {
     return &eps_component_interface;
-}
-
-/*
-** Standalone tick function for main execution
-*/
-static void eps_standalone_tick(uint64_t tick_time_ns)
-{
-    static component_state_t* g_state = NULL;
-    
-    /* Initialize on first call */
-    if (!g_state)
-    {
-        if (eps_component_init(&g_state) != COMPONENT_SUCCESS)
-        {
-            printf("EPS SIM: Failed to initialize component state\n");
-            return;
-        }
-    }
-    
-    /* Call the component tick function */
-    eps_component_tick(g_state, tick_time_ns, NULL);
-}
-
-/*
-** Main function for standalone execution
-*/
-int main(void)
-{
-    printf("EPS SIM: Starting standalone EPS simulation\n");
-    
-    /* Run the simulith client loop */
-    simulith_client_run_loop(eps_standalone_tick);
-    
-    /* Note: Cleanup will happen when the loop exits */
-    return 0;
 }
