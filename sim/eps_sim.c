@@ -27,16 +27,22 @@ static void handle_eps_command(eps_sim_state_t* state, const uint8_t* data, size
         return;
     }
 
+    #ifdef EPS_CFG_DEBUG
     printf("EPS SIM: Received command 0x%02X with payload 0x%02X\n", cmd->command, cmd->payload);
+    #endif
 
     switch (cmd->command)
     {
         case EPS_CMD_NOOP:
+            #ifdef EPS_CFG_DEBUG
             printf("EPS SIM: NOOP command\n");
+            #endif
             break;
 
         case EPS_CMD_GET_HK:
+            #ifdef EPS_CFG_DEBUG
             printf("EPS SIM: Housekeeping request\n");
+            #endif
             /* Calculate CRC for housekeeping data */
             state->hk.crc = EPS_Calculate_CRC8((const uint8_t*)&state->hk, sizeof(state->hk) - 1);
             /* Send housekeeping data back via I2C */
@@ -44,34 +50,44 @@ static void handle_eps_command(eps_sim_state_t* state, const uint8_t* data, size
             {
                 printf("EPS SIM: Failed to send housekeeping data\n");
             }
+            #ifdef EPS_CFG_DEBUG
             else
             {
                 printf("EPS SIM: Sent housekeeping data (%zu bytes)\n", sizeof(state->hk));
             }
+            #endif
             break;
 
         case EPS_CMD_SWITCH_OFF:
             if (cmd->payload < EPS_NUM_SWITCHES)
             {
                 state->hk.switches[cmd->payload].state = EPS_SWITCH_OFF;
+                #ifdef EPS_CFG_DEBUG
                 printf("EPS SIM: Switch %d turned OFF\n", cmd->payload);
+                #endif
             }
+            #ifdef EPS_CFG_DEBUG
             else
             {
                 printf("EPS SIM: Invalid switch number %d\n", cmd->payload);
             }
+            #endif
             break;
 
         case EPS_CMD_SWITCH_ON:
             if (cmd->payload < EPS_NUM_SWITCHES)
             {
                 state->hk.switches[cmd->payload].state = EPS_SWITCH_ON;
+                #ifdef EPS_CFG_DEBUG
                 printf("EPS SIM: Switch %d turned ON\n", cmd->payload);
+                #endif
             }
+            #ifdef EPS_CFG_DEBUG
             else
             {
                 printf("EPS SIM: Invalid switch number %d\n", cmd->payload);
             }
+            #endif
             break;
 
         default:
@@ -203,9 +219,7 @@ void eps_sim_cleanup(eps_sim_state_t* state)
 ** Component initialization for simulith framework
 */
 static int eps_component_init(component_state_t** state)
-{
-    printf("EPS SIM: Starting EPS simulation component\n");
-    
+{    
     /* Allocate component state */
     eps_sim_state_t* eps_state = (eps_sim_state_t*)malloc(sizeof(eps_sim_state_t));
     if (!eps_state)
@@ -240,7 +254,7 @@ static int eps_component_init(component_state_t** state)
     }
     
     *state = (component_state_t*)eps_state;
-    printf("EPS SIM: Component initialized successfully\n");
+    printf("EPS SIM: Initialized successfully as %s\n", eps_state->i2c_device.name);
     return COMPONENT_SUCCESS;
 }
 
@@ -264,11 +278,10 @@ static void eps_component_cleanup(component_state_t* state)
 */
 static const component_interface_t eps_component_interface = {
     .name = "eps_sim",
-    .description = "EPS device simulation component with I2C interface",
+    .description = "EPS component simulation with I2C interface",
     .init = eps_component_init,
     .tick = eps_component_tick,
-    .cleanup = eps_component_cleanup,
-    .configure = NULL  /* No configuration needed */
+    .cleanup = eps_component_cleanup
 };
 
 /*
