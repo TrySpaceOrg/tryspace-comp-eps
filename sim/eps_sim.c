@@ -14,9 +14,9 @@ static void handle_eps_command(eps_sim_state_t* state, const uint8_t* data, size
     EPS_Command_t* cmd = (EPS_Command_t*)data;
     
     /* Verify I2C address */
-    if (cmd->i2c_addr != EPS_I2C_DEVICE_ADDR)
+    if (cmd->i2c_addr != EPS_CFG_I2C_DEVICE_ADDR)
     {
-        printf("EPS SIM: Wrong I2C address 0x%02X (expected 0x%02X)\n", cmd->i2c_addr, EPS_I2C_DEVICE_ADDR);
+        printf("EPS SIM: Wrong I2C address 0x%02X (expected 0x%02X)\n", cmd->i2c_addr, EPS_CFG_I2C_DEVICE_ADDR);
         return;
     }
 
@@ -240,9 +240,9 @@ static int eps_component_init(component_state_t** state)
     memset(&eps_state->i2c_device, 0, sizeof(eps_state->i2c_device));
     /* Set up ZMQ address for this device */
     snprintf(eps_state->i2c_device.name, sizeof(eps_state->i2c_device.name), 
-        "eps_sim_bus%d_addr0x%02X", EPS_I2C_BUS_ID, EPS_I2C_DEVICE_ADDR);
+        "eps_sim_bus%d_addr0x%02X", EPS_CFG_I2C_BUS_ID, EPS_CFG_I2C_DEVICE_ADDR);
     snprintf(eps_state->i2c_device.address, sizeof(eps_state->i2c_device.address), 
-        "ipc:///tmp/simulith_pub:%d", SIMULITH_I2C_BASE_PORT + EPS_I2C_BUS_ID * 100 + EPS_I2C_DEVICE_ADDR);
+        "ipc:///tmp/simulith_pub:%d", SIMULITH_I2C_BASE_PORT + EPS_CFG_I2C_BUS_ID * 100 + EPS_CFG_I2C_DEVICE_ADDR);
     eps_state->i2c_device.is_server = 1;  // Always server/bind for the simulator
 
     if (simulith_transport_init(&eps_state->i2c_device) != 0)

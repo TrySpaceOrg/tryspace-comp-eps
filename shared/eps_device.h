@@ -10,13 +10,6 @@
 #include "libi2c.h"
 
 /*
-** EPS I2C Configuration
-*/
-#define EPS_I2C_BUS_ID     0
-#define EPS_I2C_DEVICE_ADDR 0x1E
-#define EPS_I2C_SPEED      400000  /* 400kHz */
-
-/*
 ** EPS Command definitions (as per README)
 */
 #define EPS_CMD_NOOP        0x00
