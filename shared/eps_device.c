@@ -71,9 +71,9 @@ int32_t EPS_InitDevice(i2c_bus_info_t *device)
     }
 
     /* Configure I2C device parameters */
-    device->handle = EPS_I2C_BUS_ID;
-    device->addr = EPS_I2C_DEVICE_ADDR;
-    device->speed = EPS_I2C_SPEED;
+    device->handle = EPS_CFG_I2C_BUS_ID;
+    device->addr = EPS_CFG_I2C_DEVICE_ADDR;
+    device->speed = EPS_CFG_I2C_SPEED;
     device->isOpen = I2C_CLOSED;
 
     /* Initialize I2C master */
@@ -91,7 +91,7 @@ int32_t EPS_CommandDevice(i2c_bus_info_t *device, uint8_t cmd, uint8_t payload)
     }
 
     EPS_Command_t command;
-    command.i2c_addr = EPS_I2C_DEVICE_ADDR;
+    command.i2c_addr = EPS_CFG_I2C_DEVICE_ADDR;
     command.command = cmd;
     command.payload = payload;
     
@@ -104,7 +104,7 @@ int32_t EPS_CommandDevice(i2c_bus_info_t *device, uint8_t cmd, uint8_t payload)
     #endif
 
     /* Send command via I2C write transaction */
-    return i2c_write_transaction(device, EPS_I2C_DEVICE_ADDR, (void*)&command, sizeof(command), 100);
+    return i2c_write_transaction(device, EPS_CFG_I2C_DEVICE_ADDR, (void*)&command, sizeof(command), EPS_CFG_MS_TIMEOUT);
 }
 
 /*
@@ -128,7 +128,7 @@ int32_t EPS_RequestHK(i2c_bus_info_t *device, EPS_Device_HK_tlm_t *data)
     }
 
     /* Read housekeeping data */
-    status = i2c_read_transaction(device, EPS_I2C_DEVICE_ADDR, (void*)data, sizeof(*data), 100);
+    status = i2c_read_transaction(device, EPS_CFG_I2C_DEVICE_ADDR, (void*)data, sizeof(*data), EPS_CFG_MS_TIMEOUT);
     if (status != I2C_SUCCESS)
     {
         OS_printf("EPS_RequestHK: Read failed with status %d\n", status);

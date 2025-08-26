@@ -7,13 +7,13 @@ void Test_EPS_ReadData(void)
     uint8_t        data_length = 8;
 
     /* There is no EPS_ReadData in the I2C-based implementation; use i2c_read_transaction directly in tests */
-    i2c_read_transaction(&device, EPS_I2C_DEVICE_ADDR, read_data, data_length, 0);
+    i2c_read_transaction(&device, EPS_CFG_I2C_DEVICE_ADDR, read_data, data_length, 0);
 
     UT_SetDeferredRetcode(UT_KEY(i2c_read_transaction), 1, data_length);
-    i2c_read_transaction(&device, EPS_I2C_DEVICE_ADDR, read_data, data_length, 0);
+    i2c_read_transaction(&device, EPS_CFG_I2C_DEVICE_ADDR, read_data, data_length, 0);
 
     UT_SetDeferredRetcode(UT_KEY(i2c_read_transaction), 1, data_length + 1);
-    i2c_read_transaction(&device, EPS_I2C_DEVICE_ADDR, read_data, data_length, 0);
+    i2c_read_transaction(&device, EPS_CFG_I2C_DEVICE_ADDR, read_data, data_length, 0);
 }
 
 void Test_EPS_CommandDevice(void)
