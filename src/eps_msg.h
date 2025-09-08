@@ -46,7 +46,6 @@ typedef struct
     uint8                     CommandCount;
     uint8                     DeviceErrorCount;
     uint8                     DeviceCount;
-    uint8                     DeviceEnabled;
     EPS_Device_HK_tlm_t       DeviceHK;
 
 } __attribute__((packed)) EPS_Hk_tlm_t;
