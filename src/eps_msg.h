@@ -9,10 +9,8 @@
 */
 #define EPS_NOOP_CC           0
 #define EPS_RESET_COUNTERS_CC 1
-#define EPS_ENABLE_CC         2
-#define EPS_DISABLE_CC        3
-#define EPS_SWITCH_OFF_CC     4
-#define EPS_SWITCH_ON_CC      5
+#define EPS_SWITCH_OFF_CC     2
+#define EPS_SWITCH_ON_CC      3
 
 /*
 ** Telemetry Request Command Codes
