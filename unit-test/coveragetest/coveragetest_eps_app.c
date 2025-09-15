@@ -377,65 +377,19 @@ void Test_EPS_ProcessGroundCommand(void)
     EPS_ProcessGroundCommand();
     UtAssert_True(EventTest.MatchCount == 1, "EPS_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
 
-    /* test dispatch of ENABLE */
-    FcnCode = EPS_ENABLE_CC;
-    Size    = sizeof(TestMsg.Enable);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, EPS_ENABLE_INF_EID, NULL);
-    EPS_ProcessGroundCommand();
-    // UtAssert_True(EventTest.MatchCount == 1, "EPS_ENABLE_INF_EID generated (%u)",
-    //               (unsigned int)EventTest.MatchCount);
-
-    /* test failure of command length */
-    FcnCode = EPS_ENABLE_CC;
-    Size    = sizeof(TestMsg.Switch);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_CheckEvent_Setup(&EventTest, EPS_LEN_ERR_EID, NULL);
-    EPS_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
-
-    /* test dispatch of DISABLE */
-    FcnCode = EPS_DISABLE_CC;
-    Size    = sizeof(TestMsg.Disable);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, EPS_DISABLE_INF_EID, NULL);
-    EPS_ProcessGroundCommand();
-    // UtAssert_True(EventTest.MatchCount == 1, "EPS_CMD_DISABLE_INF_EID generated (%u)",
-    //               (unsigned int)EventTest.MatchCount);
-
-    /* test failure of command length */
-    FcnCode = EPS_DISABLE_CC;
-    Size    = sizeof(TestMsg.Switch);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-    UT_CheckEvent_Setup(&EventTest, EPS_LEN_ERR_EID, NULL);
-    EPS_ProcessGroundCommand();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
-
-    /* test dispatch of SWITCH (use switch command in place of old CONFIG test) */
+    /* test dispatch of SWITCH_ON */
     FcnCode = EPS_SWITCH_ON_CC;
     Size    = sizeof(TestMsg.Switch);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, EPS_CMD_CONFIG_INF_EID, NULL);
+    UT_CheckEvent_Setup(&EventTest, EPS_CMD_SWITCH_ON_INF_EID, NULL);
     UT_SetDeferredRetcode(UT_KEY(EPS_CommandDevice), 1, OS_ERROR);
     CFE_MSG_Message_t msgPtr;
     EPS_AppData.MsgPtr = &msgPtr;
     EPS_ProcessGroundCommand();
-    // UtAssert_True(EventTest.MatchCount == 1, "EPS_CMD_CONFIG_INF_EID generated (%u)",
-    //               (unsigned int)EventTest.MatchCount);
+    UtAssert_True(EventTest.MatchCount == 1, "EPS_CMD_SWITCH_ON_INF_EID generated (%u)",
+                  (unsigned int)EventTest.MatchCount);
 
     /* test failure of command length */
     FcnCode = EPS_SWITCH_ON_CC;
@@ -449,18 +403,30 @@ void Test_EPS_ProcessGroundCommand(void)
     EPS_ProcessGroundCommand();
     UtAssert_True(EventTest.MatchCount == 1, "EPS_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
 
-    FcnCode = EPS_SWITCH_ON_CC;
+    /* test dispatch of SWITCH_OFF */
+    FcnCode = EPS_SWITCH_OFF_CC;
     Size    = sizeof(TestMsg.Switch);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-    UT_CheckEvent_Setup(&EventTest, EPS_CMD_CONFIG_INF_EID, NULL);
+    UT_CheckEvent_Setup(&EventTest, EPS_CMD_SWITCH_OFF_INF_EID, NULL);
     UT_SetDeferredRetcode(UT_KEY(EPS_CommandDevice), 1, OS_SUCCESS);
     EPS_AppData.MsgPtr = &msgPtr;
     EPS_ProcessGroundCommand();
-    // UtAssert_True(EventTest.MatchCount == 1, "EPS_CMD_CONFIG_INF_EID generated (%u)",
-    //               (unsigned int)EventTest.MatchCount);
-    
+    UtAssert_True(EventTest.MatchCount == 1, "EPS_CMD_SWITCH_OFF_INF_EID generated (%u)",
+                  (unsigned int)EventTest.MatchCount);
+
+    /* test failure of command length */
+    FcnCode = EPS_SWITCH_OFF_CC;
+    Size    = sizeof(TestMsg.Reset);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_CheckEvent_Setup(&EventTest, EPS_LEN_ERR_EID, NULL);
+    EPS_ProcessGroundCommand();
+    UtAssert_True(EventTest.MatchCount == 1, "EPS_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
 
     /* test an invalid CC */
     FcnCode = 99;
@@ -490,8 +456,6 @@ void Test_EPS_ReportHousekeeping(void)
 
     /* Set up to capture timestamp message address */
     UT_SetDataBuffer(UT_KEY(CFE_SB_TimeStampMsg), &MsgTimestamp, sizeof(MsgTimestamp), false);
-
-    EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_ENABLED;
 
     /* Call unit under test, NULL pointer confirms command access is through APIs */
     EPS_ReportHousekeeping();
@@ -552,56 +516,6 @@ void Test_EPS_VerifyCmdLength(void)
     UtAssert_True(EventTest.MatchCount == 1, "EPS_LEN_ERR_EID generated (%u)", (unsigned int)EventTest.MatchCount);
 }
 
-void Test_EPS_Enable(void)
-{
-    UT_CheckEvent_t EventTest;
-
-    UT_CheckEvent_Setup(&EventTest, EPS_ENABLE_INF_EID, NULL);
-    EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_DISABLED;
-    UT_SetDeferredRetcode(UT_KEY(i2c_master_init), 1, OS_SUCCESS);
-    EPS_Enable();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS: Device enabled (%u)", (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, EPS_I2C_INIT_ERR_EID, NULL);
-    EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_DISABLED;
-    /* EPS_Enable() calls EPS_InitDevice() (stubbed in unit tests) which should be deferred here */
-    UT_SetDeferredRetcode(UT_KEY(EPS_InitDevice), 1, OS_ERROR);
-    EPS_Enable();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS: I2C port initialization error (%u)",
-                  (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, EPS_ENABLE_ERR_EID, NULL);
-    EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_ENABLED;
-    UT_SetDeferredRetcode(UT_KEY(i2c_master_init), 1, OS_ERROR);
-    EPS_Enable();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS: Device enable failed, already enabled (%u)",
-                  (unsigned int)EventTest.MatchCount);
-}
-
-void Test_EPS_Disable(void)
-{
-    UT_CheckEvent_t EventTest;
-
-    UT_CheckEvent_Setup(&EventTest, EPS_DISABLE_INF_EID, NULL);
-    EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_ENABLED;
-    UT_SetDeferredRetcode(UT_KEY(i2c_master_close), 1, OS_SUCCESS);
-    EPS_Disable();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS: Device disabled (%u)", (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, EPS_I2C_CLOSE_ERR_EID, NULL);
-    EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_ENABLED;
-    UT_SetDeferredRetcode(UT_KEY(i2c_master_close), 1, OS_ERROR);
-    EPS_Disable();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS: I2C port close error (%u)", (unsigned int)EventTest.MatchCount);
-
-    UT_CheckEvent_Setup(&EventTest, EPS_DISABLE_ERR_EID, NULL);
-    EPS_AppData.HkTelemetryPkt.DeviceEnabled = EPS_DEVICE_DISABLED;
-    UT_SetDeferredRetcode(UT_KEY(i2c_master_close), 1, OS_ERROR);
-    EPS_Disable();
-    UtAssert_True(EventTest.MatchCount == 1, "EPS: Device disable failed, already disabled (%u)",
-                  (unsigned int)EventTest.MatchCount);
-}
-
 /*
  * Setup function prior to every test
  */
@@ -627,6 +541,4 @@ void UtTest_Setup(void)
     ADD_TEST(EPS_ReportHousekeeping);
     ADD_TEST(EPS_VerifyCmdLength);
     ADD_TEST(EPS_ProcessTelemetryRequest);
-    ADD_TEST(EPS_Enable);
-    ADD_TEST(EPS_Disable);
 }
