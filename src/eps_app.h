@@ -19,12 +19,6 @@
 #define EPS_PIPE_DEPTH 32
 
 /*
-** Enabled and Disabled Definitions
-*/
-#define EPS_DEVICE_DISABLED 0
-#define EPS_DEVICE_ENABLED  1
-
-/*
 ** EPS global data structure
 ** The cFE convention is to put all global app data in a single struct.
 ** This struct is defined in the `eps_app.h` file with one global instance
@@ -72,8 +66,6 @@ void  EPS_ProcessGroundCommand(void);
 void  EPS_ProcessTelemetryRequest(void);
 void  EPS_ReportHousekeeping(void);
 void  EPS_ResetCounters(void);
-void  EPS_Enable(void);
-void  EPS_Disable(void);
 void  EPS_SetSwitchOff(void);
 void  EPS_SetSwitchOn(void);
 int32 EPS_VerifyCmdLength(CFE_MSG_Message_t *msg, uint16 expected_length);

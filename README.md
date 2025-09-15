@@ -62,10 +62,8 @@ Two message IDs exist for commands:
 * 0x18D0 - Commands
   * (0) No operation
   * (1) Reset counters
-  * (2) Enable
-  * (3) Disable
-  * (4) Set switch OFF
-  * (5) Set switch ON
+  * (3) Set switch OFF
+  * (4) Set switch ON
 * 0x18D1 - Requests
   * (0) Request telemetry
 

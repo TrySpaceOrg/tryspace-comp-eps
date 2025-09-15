@@ -9,10 +9,8 @@
 */
 #define EPS_NOOP_CC           0
 #define EPS_RESET_COUNTERS_CC 1
-#define EPS_ENABLE_CC         2
-#define EPS_DISABLE_CC        3
-#define EPS_SWITCH_OFF_CC     4
-#define EPS_SWITCH_ON_CC      5
+#define EPS_SWITCH_OFF_CC     2
+#define EPS_SWITCH_ON_CC      3
 
 /*
 ** Telemetry Request Command Codes
@@ -48,7 +46,6 @@ typedef struct
     uint8                     CommandCount;
     uint8                     DeviceErrorCount;
     uint8                     DeviceCount;
-    uint8                     DeviceEnabled;
     EPS_Device_HK_tlm_t       DeviceHK;
 
 } __attribute__((packed)) EPS_Hk_tlm_t;

@@ -14,13 +14,6 @@
       <xtce:IntegerParameterType name="DEVICE_COUNT_Type" shortDescription="Device Command Count" signed="false">
         <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </xtce:IntegerParameterType>
-      <xtce:EnumeratedParameterType name="DEVICE_ENABLED_Type" shortDescription="Device Enable Status">
-        <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
-        <xtce:EnumerationList>
-          <xtce:Enumeration value="0" label="DISABLED"/>
-          <xtce:Enumeration value="1" label="ENABLED"/>
-        </xtce:EnumerationList>
-      </xtce:EnumeratedParameterType>
       <xtce:FloatParameterType name="BATTERY_VOLTAGE_Type" shortDescription="Battery Voltage (32V/255 scale)">
         <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned">
           <xtce:DefaultCalibrator>
@@ -109,7 +102,6 @@
       <xtce:Parameter name="CMD_COUNT" parameterTypeRef="CMD_COUNT_Type"/>
       <xtce:Parameter name="DEVICE_ERR_COUNT" parameterTypeRef="DEVICE_ERR_COUNT_Type"/>
       <xtce:Parameter name="DEVICE_COUNT" parameterTypeRef="DEVICE_COUNT_Type"/>
-      <xtce:Parameter name="DEVICE_ENABLED" parameterTypeRef="DEVICE_ENABLED_Type"/>
       <xtce:Parameter name="BATTERY_VOLTAGE" parameterTypeRef="BATTERY_VOLTAGE_Type"/>
       <xtce:Parameter name="BATTERY_TEMPERATURE" parameterTypeRef="BATTERY_TEMPERATURE_Type"/>
       <xtce:Parameter name="SOLAR_VOLTAGE" parameterTypeRef="SOLAR_VOLTAGE_Type"/>
@@ -147,7 +139,6 @@
           <xtce:ParameterRefEntry parameterRef="CMD_COUNT"/>
           <xtce:ParameterRefEntry parameterRef="DEVICE_ERR_COUNT"/>
           <xtce:ParameterRefEntry parameterRef="DEVICE_COUNT"/>
-          <xtce:ParameterRefEntry parameterRef="DEVICE_ENABLED"/>
           <xtce:ParameterRefEntry parameterRef="BATTERY_VOLTAGE"/>
           <xtce:ParameterRefEntry parameterRef="BATTERY_TEMPERATURE"/>
           <xtce:ParameterRefEntry parameterRef="SOLAR_VOLTAGE"/>
@@ -208,57 +199,33 @@
           <xtce:EntryList/>
         </xtce:CommandContainer>
       </xtce:MetaCommand>
-      <xtce:MetaCommand name="EPS_DISABLE_CC">
+      <xtce:MetaCommand name="EPS_SWITCH_ON_CC">
         <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
           <xtce:ArgumentAssignmentList>
             <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="0x18D0"/>
             <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="3"/>
           </xtce:ArgumentAssignmentList>
         </xtce:BaseMetaCommand>
-        <xtce:ArgumentList/>
-        <xtce:CommandContainer name="EPS_DISABLE_CC_CommandContainer">
-          <xtce:EntryList/>
-        </xtce:CommandContainer>
-      </xtce:MetaCommand>
-      <xtce:MetaCommand name="EPS_ENABLE_CC">
-        <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
-          <xtce:ArgumentAssignmentList>
-            <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="0x18D0"/>
-            <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="2"/>
-          </xtce:ArgumentAssignmentList>
-        </xtce:BaseMetaCommand>
-        <xtce:ArgumentList/>
-        <xtce:CommandContainer name="EPS_ENABLE_CC_CommandContainer">
-          <xtce:EntryList/>
+        <xtce:ArgumentList>
+          <xtce:Argument name="SWITCH_NUMBER" argumentTypeRef="SWITCH_NUMBER_Type"/>
+        </xtce:ArgumentList>
+        <xtce:CommandContainer name="EPS_SWITCH_ON_CC_CommandContainer">
+          <xtce:EntryList>
+            <xtce:ArgumentRefEntry argumentRef="SWITCH_NUMBER"/>
+          </xtce:EntryList>
         </xtce:CommandContainer>
       </xtce:MetaCommand>
       <xtce:MetaCommand name="EPS_SWITCH_OFF_CC">
         <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
           <xtce:ArgumentAssignmentList>
             <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="0x18D0"/>
-            <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="4"/>
+            <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="2"/>
           </xtce:ArgumentAssignmentList>
         </xtce:BaseMetaCommand>
         <xtce:ArgumentList>
           <xtce:Argument name="SWITCH_NUMBER" argumentTypeRef="SWITCH_NUMBER_Type"/>
         </xtce:ArgumentList>
         <xtce:CommandContainer name="EPS_SWITCH_OFF_CC_CommandContainer">
-          <xtce:EntryList>
-            <xtce:ArgumentRefEntry argumentRef="SWITCH_NUMBER"/>
-          </xtce:EntryList>
-        </xtce:CommandContainer>
-      </xtce:MetaCommand>
-      <xtce:MetaCommand name="EPS_SWITCH_ON_CC">
-        <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
-          <xtce:ArgumentAssignmentList>
-            <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="0x18D0"/>
-            <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="5"/>
-          </xtce:ArgumentAssignmentList>
-        </xtce:BaseMetaCommand>
-        <xtce:ArgumentList>
-          <xtce:Argument name="SWITCH_NUMBER" argumentTypeRef="SWITCH_NUMBER_Type"/>
-        </xtce:ArgumentList>
-        <xtce:CommandContainer name="EPS_SWITCH_ON_CC_CommandContainer">
           <xtce:EntryList>
             <xtce:ArgumentRefEntry argumentRef="SWITCH_NUMBER"/>
           </xtce:EntryList>

@@ -154,7 +154,13 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
                 eps_state->hk.switches[i].current = 0;
             }
         }
-        
+
+        #ifdef EPS_CFG_DEBUG
+        printf("EPS SIM: HK updated - Battery %d/255 V, %d/255 C; Solar %d/255 V, %d/255 C\n",
+               eps_state->hk.battery_voltage, eps_state->hk.battery_temperature,
+               eps_state->hk.solar_voltage, eps_state->hk.solar_temperature);
+        #endif
+
         last_hk_update = tick_time_ns;
     }
         

@@ -14,16 +14,12 @@
 #define EPS_CMD_ERR_EID         10
 #define EPS_CMD_NOOP_INF_EID    11
 #define EPS_CMD_RESET_INF_EID   12
-#define EPS_ENABLE_INF_EID      13
-#define EPS_ENABLE_ERR_EID      14
-#define EPS_DISABLE_INF_EID     15
-#define EPS_DISABLE_ERR_EID     16
 
 /* Device specific command event IDs */
-#define EPS_CMD_CONFIG_EN_ERR_EID  20
-#define EPS_CMD_CONFIG_VAL_ERR_EID 21
-#define EPS_CMD_CONFIG_INF_EID     22
-#define EPS_CMD_CONFIG_DEV_ERR_EID 23
+#define EPS_CMD_SWITCH_ON_INF_EID  13
+#define EPS_CMD_SWITCH_ON_ERR_EID  14
+#define EPS_CMD_SWITCH_OFF_INF_EID 15
+#define EPS_CMD_SWITCH_OFF_ERR_EID 16
 
 /* Hardware protocol event IDs */
 #define EPS_I2C_INIT_ERR_EID  30
