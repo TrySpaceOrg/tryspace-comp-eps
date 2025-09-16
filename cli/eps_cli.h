@@ -17,10 +17,17 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+#include <time.h>
 
 #include "hwlib.h"
 #include "device_cfg.h"
 #include "eps_device.h"
+
+#if TGTNAME == cpu1
+#include "simulith_transport.h"
+#endif
 
 /*
 ** Standard Defines
@@ -45,17 +52,11 @@
 /*
 ** Prototypes
 */
-
 void print_help(void);
 int  get_command(const char *str);
 int  process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_INPUT_TOKEN_SIZE]);
 int  main(int argc, char *argv[]);
-
-/*
-** Generic Prototypes
-*/
-
 int  check_number_arguments(int actual, int expected);
 void to_lower(char *str);
 
-#endif /* _EPS_CHECKOUT_H_ */
+#endif /* _EPS_CLI_H_ */
