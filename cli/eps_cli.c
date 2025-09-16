@@ -40,7 +40,7 @@ void print_help(void)
 int get_command(const char *str)
 {
     int  status = CMD_UNKNOWN;
-    char lcmd[MAX_INPUT_TOKEN_SIZE];
+    char lcmd[MAX_INPUT_TOKEN_SIZE + 1];
     strncpy(lcmd, str, MAX_INPUT_TOKEN_SIZE);
 
     /* Convert command to lower case */
@@ -107,7 +107,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_SWITCH_ON:
             if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
             {
-                switch_num = atoi(tokens[0]);
+                switch_num = (uint8_t) atoi(tokens[0]);
                 status = EPS_SetSwitch(&EpsI2c, switch_num, true);
                 if (status == OS_SUCCESS)
                     OS_printf("Switch %d ON command success\n", switch_num);
@@ -119,7 +119,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_SWITCH_OFF:
             if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
             {
-                switch_num = atoi(tokens[0]);
+                switch_num = (uint8_t) atoi(tokens[0]);
                 status = EPS_SetSwitch(&EpsI2c, switch_num, false);
                 if (status == OS_SUCCESS)
                     OS_printf("Switch %d OFF command success\n", switch_num);
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     int     num_input_tokens;
     int     cmd;
     char   *token_ptr;
-    uint8_t run_status = OS_SUCCESS;
+    int     run_status = OS_SUCCESS;
 
     /* Initialize I2C */
     status = EPS_InitDevice(&EpsI2c);
@@ -167,7 +167,13 @@ int main(int argc, char *argv[])
 
         /* Read user input */
         printf(PROMPT);
-        fgets(input_buf, MAX_INPUT_BUF, stdin);
+        if (fgets(input_buf, MAX_INPUT_BUF, stdin) == NULL)
+        {
+            /* EOF or error on stdin - exit the loop */
+            OS_printf("End of input or read error, exiting...\n");
+            run_status = OS_ERROR;
+            break;
+        }
 
         /* Tokenize line buffer */
         token_ptr = strtok(input_buf, " \t\n");
@@ -223,7 +229,7 @@ void to_lower(char *str)
     char *ptr = str;
     while (*ptr)
     {
-        *ptr = tolower((unsigned char)*ptr);
+        *ptr = (char) tolower((unsigned char)*ptr);
         ptr++;
     }
     return;

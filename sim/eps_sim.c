@@ -3,6 +3,9 @@
 /*
 ** Function to handle EPS I2C commands
 */
+/* Forward prototype for component registration export */
+const component_interface_t* get_component_interface(void);
+
 static void handle_eps_command(eps_sim_state_t* state, const uint8_t* data, size_t length)
 {
     if (length < EPS_COMMAND_SIZE)
@@ -119,12 +122,12 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
         /* Update battery/solar voltage and temperature with random slight variation (+1, 0, or -1) */
         int v_delta = (rand() % 3) - 1; // -1, 0, or +1
         int t_delta = (rand() % 3) - 1; // -1, 0, or +1
-        eps_state->hk.battery_voltage = 165 + v_delta;
-        eps_state->hk.battery_temperature = 20 + t_delta;
+        eps_state->hk.battery_voltage = (uint8_t)(165 + v_delta);
+        eps_state->hk.battery_temperature = (uint8_t)(20 + t_delta);
         v_delta = (rand() % 3) - 1;
         t_delta = (rand() % 3) - 1;
-        eps_state->hk.solar_voltage = 180 + v_delta;
-        eps_state->hk.solar_temperature = 35 + t_delta;
+        eps_state->hk.solar_voltage = (uint8_t)(180 + v_delta);
+        eps_state->hk.solar_temperature = (uint8_t)(35 + t_delta);
         
         /* Update switch voltages and currents based on state */
         for (int i = 0; i < EPS_NUM_SWITCHES; i++)
@@ -171,7 +174,7 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
         int bytes_read = simulith_transport_receive(&eps_state->i2c_device, cmd_buffer, sizeof(cmd_buffer));
         if (bytes_read > 0)
         {
-            handle_eps_command(eps_state, cmd_buffer, bytes_read);
+            handle_eps_command(eps_state, cmd_buffer, (size_t)bytes_read);
         }
     }
 }
