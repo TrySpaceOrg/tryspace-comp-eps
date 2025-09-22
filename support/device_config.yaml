@@ -4,3 +4,9 @@ eps:
   i2c_speed: 400000
   ms_timeout: 250
   debug: true
+  battery_capacity_wh: 20.0
+  max_solar_power_w: 8.0
+  switch_3v3_power_w: 0.165
+  switch_5v_power_w: 0.25
+  switch_12v_power_w: 0.6
+  switch_24v_power_w: 1.2
