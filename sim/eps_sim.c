@@ -1,10 +1,44 @@
 #include "eps_sim.h"
 
-/*
-** Function to handle EPS I2C commands
-*/
-/* Forward prototype for component registration export */
+/* Forward prototypes to satisfy -Wmissing-prototypes for REGISTER_COMPONENT export */
+const component_interface_t* get_eps_sim_component_interface(void);
 const component_interface_t* get_component_interface(void);
+
+static double calculate_power_consumption(eps_sim_state_t* state)
+{
+    double total_power_w = 0.0;
+    
+    for (int i = 0; i < EPS_NUM_SWITCHES; i++)
+    {
+        if (state->hk.switches[i].state == EPS_SWITCH_ON)
+        {
+            total_power_w += EPS_SWITCH_POWER_W(i);
+        }
+    }
+    
+    return total_power_w;
+}
+
+static double calculate_solar_generation(const simulith_42_context_t* context_42)
+{
+    if (!context_42 || !context_42->valid || context_42->eclipse)
+    {
+        return 0.0;
+    }
+    
+    // Solar array on +X side, so power depends on X-component of sun vector
+    double sun_x = context_42->sun_vector_body[0];
+    
+    // Only generate power if sun is on +X side (sun_x > 0)
+    if (sun_x > 0.0)
+    {
+        // Power proportional to sun_x (cosine of angle)
+        // Max power when sun_x = 1.0 (directly facing sun)
+        return EPS_MAX_SOLAR_POWER_W * sun_x;
+    }
+    
+    return 0.0;
+}
 
 static void handle_eps_command(eps_sim_state_t* state, const uint8_t* data, size_t length)
 {
@@ -119,14 +153,35 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
     /* Update housekeeping data every second */
     if (tick_time_ns - last_hk_update >= hk_update_interval)
     {
-        /* Update battery/solar voltage and temperature with random slight variation (+1, 0, or -1) */
-        int v_delta = (rand() % 3) - 1; // -1, 0, or +1
+        /* Calculate power consumption and generation */
+        double power_consumption_w = calculate_power_consumption(eps_state);
+        double solar_generation_w = calculate_solar_generation(context_42);
+        double net_power_w = solar_generation_w - power_consumption_w;
+        
+        /* Update battery energy (convert watts to watt-hours over time interval) */
+        double time_hours = (double)hk_update_interval / 3600000000000.0; /* nanoseconds to hours */
+        eps_state->battery_energy_wh += net_power_w * time_hours;
+        
+        /* Clamp battery energy to valid range */
+        if (eps_state->battery_energy_wh < 0.0)
+            eps_state->battery_energy_wh = 0.0;
+        if (eps_state->battery_energy_wh > EPS_BATTERY_CAPACITY_WH)
+            eps_state->battery_energy_wh = EPS_BATTERY_CAPACITY_WH;
+        
+        /* Update battery voltage based on state of charge */
+        double soc = eps_state->battery_energy_wh / EPS_BATTERY_CAPACITY_WH; /* State of charge 0-1 */
+        /* Simple model: voltage decreases linearly from max to min as SOC goes from 1 to 0 */
+        double battery_voltage_v = EPS_BATTERY_VOLTAGE_MIN + (soc * (EPS_BATTERY_VOLTAGE_MAX - EPS_BATTERY_VOLTAGE_MIN));
+        eps_state->hk.battery_voltage = (uint8_t)(battery_voltage_v / (32.0 / 255.0));
+        
+        /* Update solar voltage based on generation */
+        double solar_voltage_v = (solar_generation_w > 0.0) ? 4.5 : 0.0; /* Simplified */
+        eps_state->hk.solar_voltage = (uint8_t)(solar_voltage_v / (32.0 / 255.0));
+        
+        /* Update battery/solar temperature with random slight variation (+1, 0, or -1) */
         int t_delta = (rand() % 3) - 1; // -1, 0, or +1
-        eps_state->hk.battery_voltage = (uint8_t)(165 + v_delta);
         eps_state->hk.battery_temperature = (uint8_t)(20 + t_delta);
-        v_delta = (rand() % 3) - 1;
         t_delta = (rand() % 3) - 1;
-        eps_state->hk.solar_voltage = (uint8_t)(180 + v_delta);
         eps_state->hk.solar_temperature = (uint8_t)(35 + t_delta);
         
         /* Update switch voltages and currents based on state */
@@ -159,9 +214,9 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
         }
 
         #ifdef EPS_CFG_DEBUG
-        printf("EPS SIM: HK updated - Battery %d/255 V, %d/255 C; Solar %d/255 V, %d/255 C\n",
-               eps_state->hk.battery_voltage, eps_state->hk.battery_temperature,
-               eps_state->hk.solar_voltage, eps_state->hk.solar_temperature);
+        printf("EPS SIM: HK updated - Battery %.2f Wh (%.1f%%), %.1fV; Solar %.2fW, %.1fV; Consumption %.3fW\n",
+               eps_state->battery_energy_wh, soc * 100.0,
+               battery_voltage_v, solar_generation_w, solar_voltage_v, power_consumption_w);
         #endif
 
         last_hk_update = tick_time_ns;
@@ -193,9 +248,11 @@ int eps_sim_init(eps_sim_state_t* state)
     /* Initialize housekeeping data */
     memset(&state->hk, 0, sizeof(state->hk));
     state->device_counter = 0;
+    state->battery_energy_wh = EPS_BATTERY_CAPACITY_WH * EPS_BATTERY_INITIAL_SOC; /* Start at configured SOC */
     
-    /* Set initial values */
-    state->hk.battery_voltage = 165;
+    /* Set initial values based on configuration */
+    double initial_voltage = EPS_BATTERY_VOLTAGE_MIN + (EPS_BATTERY_INITIAL_SOC * (EPS_BATTERY_VOLTAGE_MAX - EPS_BATTERY_VOLTAGE_MIN));
+    state->hk.battery_voltage = (uint8_t)(initial_voltage / (32.0 / 255.0)); /* Convert to telemetry counts */
     state->hk.battery_temperature = 20;
     state->hk.solar_voltage = 180;
     state->hk.solar_temperature = 35;
