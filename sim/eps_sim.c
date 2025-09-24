@@ -170,8 +170,8 @@ static void eps_component_tick(component_state_t* state, uint64_t tick_time_ns, 
         
         /* Update battery voltage based on state of charge */
         double soc = eps_state->battery_energy_wh / EPS_BATTERY_CAPACITY_WH; /* State of charge 0-1 */
-        /* Simple model: voltage decreases linearly from 4.2V to 3.0V as SOC goes from 1 to 0 */
-        double battery_voltage_v = 3.0 + (soc * 1.2);
+        /* Simple model: voltage decreases linearly from max to min as SOC goes from 1 to 0 */
+        double battery_voltage_v = EPS_BATTERY_VOLTAGE_MIN + (soc * (EPS_BATTERY_VOLTAGE_MAX - EPS_BATTERY_VOLTAGE_MIN));
         eps_state->hk.battery_voltage = (uint8_t)(battery_voltage_v / (32.0 / 255.0));
         
         /* Update solar voltage based on generation */
@@ -248,11 +248,11 @@ int eps_sim_init(eps_sim_state_t* state)
     /* Initialize housekeeping data */
     memset(&state->hk, 0, sizeof(state->hk));
     state->device_counter = 0;
-    state->battery_energy_wh = EPS_BATTERY_CAPACITY_WH * 0.8; /* Start at 80% charge */
-    state->battery_energy_wh = EPS_BATTERY_CAPACITY_WH * 0.8; /* Start at 80% charge */
+    state->battery_energy_wh = EPS_BATTERY_CAPACITY_WH * EPS_BATTERY_INITIAL_SOC; /* Start at configured SOC */
     
-    /* Set initial values */
-    state->hk.battery_voltage = 165;
+    /* Set initial values based on configuration */
+    double initial_voltage = EPS_BATTERY_VOLTAGE_MIN + (EPS_BATTERY_INITIAL_SOC * (EPS_BATTERY_VOLTAGE_MAX - EPS_BATTERY_VOLTAGE_MIN));
+    state->hk.battery_voltage = (uint8_t)(initial_voltage / (32.0 / 255.0)); /* Convert to telemetry counts */
     state->hk.battery_temperature = 20;
     state->hk.solar_voltage = 180;
     state->hk.solar_temperature = 35;
